@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { analyzeAnamnesis } from '../lib/ai'
+import { useToast } from '../components/Toast'
 
 export const ANM_SECTIONS = [
   { id:'consent', title:'Termo e Consentimento', desc:'Leia com atencao. Em caso de risco imediato: SAMU 192 ou CVV 188.', fields:[
@@ -59,6 +60,7 @@ export const ANM_TABS = ['Consent.','Identificacao','Queixa','Historia','Dificul
 
 export default function Anamnese() {
   const { session } = useAuth()
+  const { toast, promptCopy } = useToast()
   const [list, setList] = useState([])
   const [selected, setSelected] = useState(null)
   const [tab, setTab] = useState(0)
@@ -77,9 +79,9 @@ export default function Anamnese() {
     const { data, error } = await supabase.from('anamneses')
       .insert({ therapist_id: session.user.id, status: 'sent' })
       .select().single()
-    if (error) { alert(error.message); return }
+    if (error) { toast.error(error.message); return }
     const url = `${window.location.origin}/a/${data.public_token}`
-    prompt('Envie este link seguro ao paciente (expira em 7 dias):', url)
+    await promptCopy('Link seguro de anamnese (expira em 7 dias) — envie ao paciente por WhatsApp:', url)
     load()
   }
 

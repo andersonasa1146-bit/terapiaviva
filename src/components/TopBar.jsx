@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { initials } from '../lib/format'
+import { SITE } from '../config/site'
 
 export default function TopBar() {
   const { therapist, signOut } = useAuth()
@@ -17,12 +18,12 @@ export default function TopBar() {
     <header className="topbar">
       <Link to="/" className="logo">
         <div className="logo-dot">{initial}</div>
-        TerapiaViva
+        {SITE.appName}
       </Link>
       <div className="topbar-r">
         <span className="top-date">{today}</span>
         <span className="api-badge api-ok" title="IA rodando no servidor (chave protegida)">🔒 IA segura</span>
-        <div className="avatar" title={therapist?.full_name || ''} onClick={handleSignOut}>{initial}</div>
+        <div className="avatar" title={`${therapist?.full_name || ''} · Clique para sair`} onClick={handleSignOut}>{initial}</div>
       </div>
     </header>
   )

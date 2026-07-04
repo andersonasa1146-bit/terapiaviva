@@ -7,61 +7,8 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { brl, monthLabel, monthYear } from '../lib/format'
 import FinancialTip from '../components/charts/FinancialTip'
-
-// -------- Ideias de prospeccao e formacao (conteudo estatico curado) ---------
-const PROSPECCAO = [
-  { tag: 'IGREJA', title: 'Palestras gratuitas em igrejas',
-    desc: 'Ofereca 1 palestra/mes em igrejas parceiras (Recife/Olinda/Caruaru) sobre "Ansiedade e Fe" ou "Casamento cristao restaurado". Traga cartao QR de agendamento.' },
-  { tag: 'IGREJA', title: 'Ministerio de casais e grupos de mulheres',
-    desc: 'Facilite 1 encontro trimestral em ministerios de casais e grupos de mulheres batistas. Segmenta pacientes ideais.' },
-  { tag: 'REDES', title: 'Instagram — 3 Reels por semana',
-    desc: 'Formato: "3 versiculos para a semana de ansiedade" · "Perguntas frequentes do consultorio" · "Antes/depois da terapia crista".' },
-  { tag: 'REDES', title: 'YouTube Shorts + podcast semanal',
-    desc: 'Grave 1 episodio de 15 min por semana (ancorado em livro do mes). Repurpose em Shorts, Reels e Tiktok.' },
-  { tag: 'PARCERIA', title: 'Rede de profissionais cristaos',
-    desc: 'Firme parceria com 3 psiquiatras, 2 nutricionistas, 1 fisioterapeuta cristaos. Encaminhamentos cruzados com comissao ou reciprocidade.' },
-  { tag: 'PARCERIA', title: 'Radio cristas locais',
-    desc: 'Coluna semanal fixa em radio cristas de Recife (Radio 96.1, Radio Novas de Paz). Reforca autoridade e SEO local.' },
-  { tag: 'DIGITAL', title: 'Blog + SEO local',
-    desc: 'Publique 2 artigos/mes: "aconselhamento biblico Recife", "terapia crista Olinda". Google Business Profile com posts semanais.' },
-  { tag: 'DIGITAL', title: 'Anuncios Meta e Google',
-    desc: 'R$300/mes segmentando mulheres 30-55, evangelicas, PE. Landing page unica de captura para trial (chamada gratuita de 20 min).' },
-  { tag: 'RETENCAO', title: 'Programa Indicacao Abencoada',
-    desc: 'Paciente que indica 3 e nova sessao gratuita. Comunique por WhatsApp com cartao personalizado.' },
-  { tag: 'PRODUTO', title: 'Workshop pago mensal (R$97-297)',
-    desc: 'Temas: "Cura interior em 8 encontros" · "Casamento restaurado" · "Ansiedade e paz". Escala receita sem escalar sessoes 1-a-1.' },
-  { tag: 'PRODUTO', title: 'Retiros trimestrais (3 dias)',
-    desc: 'Parceria com pousada crista. 20-30 vagas a R$1.200 cada. Margem alta + geracao de leads para acompanhamento.' },
-  { tag: 'CRM', title: 'Reativacao de ex-pacientes',
-    desc: 'A cada 90 dias, WhatsApp de acolhimento com versiculo personalizado. Historico mostra 15-25% de retorno.' },
-]
-
-const FORMACAO = [
-  { tag: 'CURSO', title: 'Aconselhamento Biblico Noutetico (CACP)',
-    desc: 'Curso de referencia no Brasil — 12 modulos. Base para autoridade academica no nicho.' },
-  { tag: 'CURSO', title: 'Trauma-Focused CBT (Beck Institute)',
-    desc: 'Padrao internacional para trauma. Curso online, certificado reconhecido.' },
-  { tag: 'CURSO', title: 'Certificacao em ACT (Acceptance & Commitment Therapy)',
-    desc: 'Aprofunda repertorio para ansiedade e defusao cognitiva — combina bem com espiritualidade.' },
-  { tag: 'CURSO', title: 'Formacao em EMDR nivel 1 e 2',
-    desc: 'Padrao ouro para trauma. Investimento alto (R$8-15k) mas eleva ticket medio 40-60%.' },
-  { tag: 'CURSO', title: 'Especializacao em Terapia do Casal Crista',
-    desc: 'FAT-BR, IBP ou Instituto Ellel — direciona posicionamento premium para casais evangelicos.' },
-  { tag: 'LIVRO', title: 'Aconselhamento Biblico — Jay Adams',
-    desc: 'Fundacao teologica noutetica. Leitura obrigatoria para o nicho.' },
-  { tag: 'LIVRO', title: 'Corpo Guarda as Marcas — Bessel van der Kolk',
-    desc: 'Ponte com neurociencia do trauma. Base para intervencoes somaticas.' },
-  { tag: 'LIVRO', title: 'Como Mudar o Coracao — Paul Tripp',
-    desc: 'Modelo de mudanca centrado na graca — util para pacientes em estagnacao espiritual.' },
-  { tag: 'EVENTO', title: 'Congresso Brasileiro de Aconselhamento Biblico',
-    desc: 'Anual. Networking + palestrantes internacionais + venda direta de servicos no local.' },
-  { tag: 'EVENTO', title: 'Conferencia Fiel para pastores',
-    desc: 'Alcanca pastores que encaminham pacientes. Presenca com stand vale ate 6 novos pacientes.' },
-  { tag: 'SUPERV', title: 'Grupo de supervisao clinica com pares',
-    desc: 'Formar/participar de grupo quinzenal com 4-6 terapeutas cristas. Reduz burnout e afina casos.' },
-  { tag: 'GESTAO', title: 'Sebrae — Gestao para profissionais liberais',
-    desc: 'Curso gratuito. Aperfeicoa precificacao, tributacao PJ e fluxo de caixa.' },
-]
+import { useToast } from '../components/Toast'
+import { PROSPECCAO, FORMACAO } from '../data/growthIdeas'
 
 // -----------------------------------------------------------------------------
 // Helpers de dados
@@ -97,6 +44,7 @@ function buildMonthlySeries(rows) {
 // -----------------------------------------------------------------------------
 export default function Financial() {
   const { session } = useAuth()
+  const { toast } = useToast()
   const [monthly, setMonthly] = useState([])
   const [byCat, setByCat] = useState([])
   const [entries, setEntries] = useState([])
@@ -149,12 +97,14 @@ export default function Financial() {
   async function addEntry(e) {
     e.preventDefault()
     if (!form.description || !form.amount) return
+    if (Number(form.amount) <= 0) { toast.error('Informe um valor maior que zero.'); return }
     const { error } = await supabase.from('financial_entries').insert({
       therapist_id: session.user.id,
       kind: form.kind, category: form.category, description: form.description,
       amount: Number(form.amount), entry_date: form.entry_date, status: form.status,
     })
-    if (error) { alert(error.message); return }
+    if (error) { toast.error(error.message); return }
+    toast.success('Lancamento salvo.')
     setForm({ ...form, description: '', amount: '' })
     // refresh
     const uid = session.user.id
@@ -307,7 +257,7 @@ export default function Financial() {
               </div>
               <div className="field">
                 <label>Valor (R$)</label>
-                <input type="number" step="0.01" value={form.amount} onChange={(e)=>setForm({...form, amount:e.target.value})} required />
+                <input type="number" step="0.01" min="0.01" value={form.amount} onChange={(e)=>setForm({...form, amount:e.target.value})} required />
               </div>
               <div className="field">
                 <label>Data</label>
@@ -340,7 +290,6 @@ export default function Financial() {
       <div className="card" style={{marginBottom:14}}>
         <div className="chdr" style={{background:'linear-gradient(90deg, var(--pl), var(--tl))'}}>
           <span>🚀 Crescimento — Prospeccao de clientes e aperfeicoamento profissional</span>
-          <span style={{fontSize:10,color:'var(--txt3)'}}>Curadoria para terapeuta biblica crista</span>
         </div>
         <div className="cbdy">
           <div className="prosp-grid">
@@ -370,8 +319,8 @@ export default function Financial() {
 
           <div className="callout clprv" style={{marginTop:14}}>
             <strong>💡 Metas de crescimento sugeridas para 90 dias</strong>
-            1) Publicar 24 conteudos (Reels/Blog) · 2) Fechar 2 parcerias com igrejas · 3) Lancar 1 workshop pago ·
-            4) Iniciar 1 curso de aperfeicoamento (ACT ou EMDR) · 5) Reativar 10 ex-pacientes por WhatsApp com versiculo personalizado ·
+            1) Publicar 24 conteudos (Reels/Blog) · 2) Fechar 2 parcerias locais · 3) Lancar 1 workshop pago ·
+            4) Iniciar 1 curso de aperfeicoamento · 5) Reativar 10 ex-pacientes por WhatsApp ·
             6) Alcancar +25% de receita YoY no proximo trimestre.
           </div>
         </div>

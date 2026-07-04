@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../components/Toast'
 
 export default function Agenda() {
   const { session } = useAuth()
+  const { toast } = useToast()
   const [appts, setAppts] = useState([])
   const [patients, setPatients] = useState([])
   const [show, setShow] = useState(false)
@@ -25,7 +27,8 @@ export default function Agenda() {
       starts_at: starts.toISOString(), ends_at: ends.toISOString(),
       mode: form.mode, amount: form.amount ? Number(form.amount) : null,
     })
-    if (error) { alert(error.message); return }
+    if (error) { toast.error(error.message); return }
+    toast.success('Agendamento salvo.')
     setShow(false); setForm({ patient_id:'', starts_at:'', ends_at:'', mode:'presencial', amount:'' })
     load()
   }
@@ -71,7 +74,7 @@ export default function Agenda() {
                 </div>
                 <div className="field"><label>Inicio *</label><input type="datetime-local" required value={form.starts_at} onChange={e=>setForm({...form,starts_at:e.target.value})} /></div>
                 <div className="field"><label>Fim</label><input type="datetime-local" value={form.ends_at} onChange={e=>setForm({...form,ends_at:e.target.value})} /></div>
-                <div className="field"><label>Valor (R$)</label><input type="number" step="0.01" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} /></div>
+                <div className="field"><label>Valor (R$)</label><input type="number" step="0.01" min="0" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} /></div>
               </div>
               <button className="btn btn-p" type="submit">Salvar</button>
             </form>

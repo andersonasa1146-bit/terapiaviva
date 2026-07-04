@@ -4,11 +4,14 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { analyzeSession } from '../lib/ai'
 import { today as todayStr } from '../lib/format'
+import { useToast } from '../components/Toast'
+import { SITE } from '../config/site'
 
 export default function PatientFile() {
   const { id } = useParams()
   const nav = useNavigate()
   const { session } = useAuth()
+  const { toast } = useToast()
   const [patient, setPatient] = useState(null)
   const [sessions, setSessions] = useState([])
   const [tab, setTab] = useState('sess')
@@ -33,7 +36,7 @@ export default function PatientFile() {
   }
 
   const save = async () => {
-    if (!form.content || form.content.trim().length < 10) { alert('Preencha as anotacoes antes de salvar.'); return }
+    if (!form.content || form.content.trim().length < 10) { toast.error('Preencha as anotacoes antes de salvar.'); return }
     setSaving(true)
     const num = sessions.length + 1
     const { data, error } = await supabase.from('sessions').insert({
@@ -52,7 +55,8 @@ export default function PatientFile() {
       private_notes: form.private_notes,
     }).select().single()
     setSaving(false)
-    if (error) { alert(error.message); return }
+    if (error) { toast.error(error.message); return }
+    toast.success('Sessao salva.')
     setForm({ session_date: todayStr(), mode:'presencial', arrival:'', content:'', mood:5, spirit:5, openness:5, goals_done:[], next_goals:'', private_notes:'' })
     setAi(null); setAiErr(null)
     load()
@@ -204,7 +208,7 @@ export default function PatientFile() {
             }}>🖨 Imprimir / Salvar PDF</button>
           </div>
           <div className="rpt-doc" id="rpt-content">
-            <div className="rpt-logo"><h2>TerapiaViva</h2><p>Documento confidencial · LGPD</p></div>
+            <div className="rpt-logo"><h2>{SITE.appName}</h2><p>Documento confidencial · LGPD</p></div>
             <div className="rpt-sec"><div className="rpt-ttl">Identificacao</div><div className="rpt-grid">
               {[['Nome',patient.full_name],['Profissao',patient.profession||'—'],['Igreja',patient.church||'—'],['Total de sessoes',sessions.length],['Nivel de risco',patient.risk.toUpperCase()],['Data',new Date().toLocaleDateString('pt-BR')]].map(([k,v])=>(
                 <div key={k} className="rpt-fld"><strong>{k}</strong>{v}</div>

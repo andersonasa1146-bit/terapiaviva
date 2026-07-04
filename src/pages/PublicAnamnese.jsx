@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ANM_SECTIONS } from './Anamnese'
+import { useToast } from '../components/Toast'
+import { SITE } from '../config/site'
 
 // Portal publico para o paciente responder — nao requer login.
 // Usa a funcao RPC submit_anamnesis que o esquema publica.
 
 export default function PublicAnamnese() {
   const { token } = useParams()
+  const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({})
   const [done, setDone] = useState(false)
@@ -32,7 +35,7 @@ export default function PublicAnamnese() {
       p_token: token, p_answers: answers, p_risk_flagged: risk,
     })
     setBusy(false)
-    if (error || data?.ok === false) { alert(error?.message || data?.error || 'Erro ao enviar.'); return }
+    if (error || data?.ok === false) { toast.error(error?.message || data?.error || 'Erro ao enviar. Tente novamente.'); return }
     setDone(true)
   }
 
@@ -51,7 +54,7 @@ export default function PublicAnamnese() {
       <div style={{background:'var(--card)',borderBottom:'1px solid var(--bdr)',padding:'12px 16px'}}>
         <div style={{maxWidth:640,margin:'0 auto',display:'flex',alignItems:'center',gap:8}}>
           <div className="logo-dot">TV</div>
-          <div><strong style={{fontSize:14,color:'var(--pd)'}}>TerapiaViva</strong><div style={{fontSize:10,color:'var(--txt3)'}}>Formulario confidencial · LGPD</div></div>
+          <div><strong style={{fontSize:14,color:'var(--pd)'}}>{SITE.appName}</strong><div style={{fontSize:10,color:'var(--txt3)'}}>Formulario confidencial · LGPD</div></div>
         </div>
       </div>
       <div className="anm-prog"><div className="anm-prog-fill" style={{width:`${pct}%`}}></div></div>

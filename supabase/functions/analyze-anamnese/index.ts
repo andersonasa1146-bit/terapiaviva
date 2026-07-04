@@ -7,16 +7,36 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-4-6";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+// Origem(ns) permitida(s) para chamar esta função, separadas por vírgula.
+// Configure em produção: supabase secrets set ALLOWED_ORIGINS=https://app.seudominio.com
+const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "*")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
 
-const SYSTEM_PROMPT = `Voce e assistente clinico de apoio a uma Terapeuta Biblica Crista (tradicao batista).
+function corsHeadersFor(req: Request) {
+  const origin = req.headers.get("Origin") ?? "";
+  const allowAll = ALLOWED_ORIGINS.includes("*");
+  const allowOrigin = allowAll ? "*" : (ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0] ?? "");
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+
+// Nicho/tradicao de aconselhamento — configuravel por instalacao (white-label).
+// Se nao configurado, mantem o comportamento atual (tradicao biblica batista).
+const TRADITION_LABEL = Deno.env.get("THERAPY_TRADITION_LABEL")
+  ?? "Terapeuta Biblica Crista (tradicao batista)";
+const COUNSELING_TRAINING = Deno.env.get("COUNSELING_TRAINING")
+  ?? "psicologia clinica DSM-5/CID-11, TCC, ACT, trauma, apego, aconselhamento biblico noutetico, teologia pastoral batista";
+
+function buildSystemPrompt() {
+  return `Voce e assistente clinico de apoio a uma ${TRADITION_LABEL}.
 Gere avaliacao preliminar CONFIDENCIAL da anamnese.
-Treinamento: psicologia clinica DSM-5/CID-11, TCC, ACT, trauma, apego,
-aconselhamento biblico noutetico, teologia pastoral batista.
+Treinamento: ${COUNSELING_TRAINING}.
 Retorne SOMENTE JSON valido:
 {
   "nivel_risco": "baixo" | "moderado" | "alto" | "critico",
@@ -28,37 +48,49 @@ Retorne SOMENTE JSON valido:
   "abordagens_recomendadas": [""],
   "foco_primeira_sessao": "",
   "nota_terapeuta": ""
-}`;
+}
+Se a abordagem configurada nao for religiosa, retorne "observacoes_espirituais" como uma lista vazia.`;
+}
 
 Deno.serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method !== "POST") return json(corsHeaders, { error: "Method not allowed" }, 405);
 
   try {
     const authHeader = req.headers.get("Authorization") ?? "";
-    if (!authHeader.startsWith("Bearer ")) return json({ error: "Sem token" }, 401);
+    if (!authHeader.startsWith("Bearer ")) return json(corsHeaders, { error: "Sem token" }, 401);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!anthropicKey) return json({ error: "ANTHROPIC_API_KEY nao configurada" }, 500);
+    if (!anthropicKey) return json(corsHeaders, { error: "ANTHROPIC_API_KEY nao configurada" }, 500);
 
     const supabase = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: userRes } = await supabase.auth.getUser();
-    if (!userRes?.user) return json({ error: "Sessao invalida" }, 401);
+    if (!userRes?.user) return json(corsHeaders, { error: "Sessao invalida" }, 401);
+
+    // Checa cota mensal de IA do plano ANTES de gastar com a Anthropic.
+    const { data: quota } = await supabase.rpc("check_ai_quota", { p_therapist_id: userRes.user.id });
+    if (quota && quota.allowed === false) {
+      return json(corsHeaders, {
+        error: `Limite mensal de analises de IA atingido (${quota.used}/${quota.limit}). Faca upgrade do plano para continuar.`,
+        quota,
+      }, 429);
+    }
 
     const body = await req.json().catch(() => ({}));
     const anamnesisId: string | undefined = body?.anamnesis_id;
-    if (!anamnesisId) return json({ error: "anamnesis_id obrigatorio" }, 400);
+    if (!anamnesisId) return json(corsHeaders, { error: "anamnesis_id obrigatorio" }, 400);
 
     const { data: an, error } = await supabase
       .from("anamneses")
       .select("id, answers")
       .eq("id", anamnesisId)
       .single();
-    if (error || !an) return json({ error: "Anamnese nao encontrada" }, 404);
+    if (error || !an) return json(corsHeaders, { error: "Anamnese nao encontrada" }, 404);
 
     const d = (an.answers ?? {}) as Record<string, any>;
     const arr = (v: any) => Array.isArray(v) ? v.join(", ") : (v ?? "-");
@@ -89,14 +121,14 @@ Objetivos: ${d.obj ?? "-"}`;
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 1600,
-        system: SYSTEM_PROMPT,
+        system: buildSystemPrompt(),
         messages: [{ role: "user", content: prompt }],
       }),
     });
 
     if (!ai.ok) {
       const err = await ai.text();
-      return json({ error: "Anthropic error", detail: err }, 502);
+      return json(corsHeaders, { error: "Anthropic error", detail: err }, 502);
     }
 
     const data = await ai.json();
@@ -108,7 +140,7 @@ Objetivos: ${d.obj ?? "-"}`;
 
     let parsed: any;
     try { parsed = JSON.parse(txt); }
-    catch { return json({ error: "IA retornou JSON invalido", raw: txt }, 502); }
+    catch { return json(corsHeaders, { error: "IA retornou JSON invalido", raw: txt }, 502); }
 
     await supabase.from("anamneses").update({
       ai_evaluation: parsed,
@@ -116,13 +148,19 @@ Objetivos: ${d.obj ?? "-"}`;
       status: "reviewed",
     }).eq("id", anamnesisId);
 
-    return json({ ok: true, evaluation: parsed });
+    // Registra o uso de IA para controle de cota do plano (best-effort).
+    await supabase.rpc("record_ai_usage", { p_therapist_id: userRes.user.id }).then(
+      () => {},
+      () => {},
+    );
+
+    return json(corsHeaders, { ok: true, evaluation: parsed });
   } catch (e) {
-    return json({ error: String((e as Error).message ?? e) }, 500);
+    return json(corsHeaders, { error: String((e as Error).message ?? e) }, 500);
   }
 });
 
-function json(body: unknown, status = 200) {
+function json(corsHeaders: Record<string, string>, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },

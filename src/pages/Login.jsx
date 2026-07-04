@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { SITE } from '../config/site'
 
 export default function Login() {
   const { session, signIn, signUp } = useAuth()
@@ -36,8 +37,8 @@ export default function Login() {
   return (
     <div className="auth-shell">
       <div className="auth-card">
-        <h1>🌿 TerapiaViva</h1>
-        <p className="sub">"Sarei-vos das vossas feridas." — Jeremias 30:17</p>
+        <h1>🌿 {SITE.appName}</h1>
+        {SITE.loginVerse && <p className="sub">{SITE.loginVerse}</p>}
         <form onSubmit={submit}>
           {mode === 'signup' && (
             <div className="field">
@@ -63,6 +64,9 @@ export default function Login() {
           <a onClick={()=>setMode(mode==='login'?'signup':'login')} style={{color:'var(--p)',cursor:'pointer',fontWeight:500}}>
             {mode==='login' ? 'Criar conta gratis' : 'Fazer login'}
           </a>
+        </p>
+        <p style={{fontSize:10,color:'var(--txt3)',marginTop:18,textAlign:'center'}}>
+          Ao continuar, voce concorda com os <a href="/termos.html" target="_blank" rel="noreferrer" style={{color:'var(--txt2)'}}>Termos de Uso</a> e a <a href="/privacidade.html" target="_blank" rel="noreferrer" style={{color:'var(--txt2)'}}>Politica de Privacidade</a>.
         </p>
       </div>
     </div>

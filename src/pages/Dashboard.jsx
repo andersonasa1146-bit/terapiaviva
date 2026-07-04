@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { SITE } from '../config/site'
 
 const VERSE = { r:'Salmo 23', t:'O Senhor e o meu Pastor; nada me faltara.' }
 
@@ -29,7 +30,7 @@ export default function Dashboard() {
     })
   }, [session])
 
-  const first = (therapist?.full_name || 'Terapeuta').split(' ')[0]
+  const first = (therapist?.full_name || SITE.therapistName || 'Terapeuta').split(' ')[0]
   const dayStr = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
   const hasToday = todayAppts.length
   const hasPending = (kpis.pending_anamneses ?? 0) > 0
@@ -46,9 +47,9 @@ export default function Dashboard() {
           <div className="hero-verse">"{VERSE.t}" — {VERSE.r}</div>
         </div>
         <div className="hero-photo">
-          <img src="/foto.jpg" alt="Sessao terapeutica" loading="lazy" />
+          <img src={SITE.heroPhoto} alt="Sessao terapeutica" loading="lazy" />
           <div className="hero-photo-ov"></div>
-          <div className="hero-lbl">{therapist?.city || 'Recife'} · {dayStr}</div>
+          <div className="hero-lbl">{therapist?.city || SITE.city || '—'} · {dayStr}</div>
         </div>
       </div>
 
