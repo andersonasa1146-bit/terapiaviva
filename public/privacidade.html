@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Politica de Privacidade</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; color: #1c2622; line-height: 1.6; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  h2 { font-size: 15px; margin-top: 28px; color: #0B5E44; }
+  p, li { font-size: 13.5px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 12.5px; }
+  th, td { border: 1px solid #DDE8E5; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #F2F5F4; }
+  .notice { background: #FDF6E3; border-left: 4px solid #B5720A; padding: 12px 16px; margin: 18px 0; font-size: 12.5px; }
+  .ph { background: #FFF2CC; padding: 1px 4px; border-radius: 3px; }
+  footer { margin-top: 40px; font-size: 11px; color: #667; }
+</style>
+</head>
+<body>
+
+<h1>Politica de Privacidade</h1>
+<p><em>Ultima atualizacao: <span class="ph">[DATA]</span></em></p>
+
+<div class="notice">
+  <strong>Aviso:</strong> este e um modelo/rascunho gerado para acelerar a colocacao do produto no mercado.
+  Ele NAO substitui a revisao de um advogado especializado em protecao de dados (LGPD). Antes de operar com
+  pacientes reais, revise com um profissional e preencha os campos <span class="ph">[PLACEHOLDER]</span>.
+</div>
+
+<h2>1. Quem trata os dados</h2>
+<p>
+  <span class="ph">[NOME DA TERAPEUTA OU RAZAO SOCIAL]</span> (<strong>controladora</strong>) usa o sistema
+  <span class="ph">[NOME DO PRODUTO/APP]</span>, operado por <span class="ph">[NOME DO OPERADOR/EMPRESA DO
+  SOFTWARE]</span> (<strong>operador</strong>), para tratar dados pessoais de suas pacientes e clientes, nos
+  termos da Lei Geral de Protecao de Dados (LGPD — Lei 13.709/2018).
+</p>
+
+<h2>2. Quais dados coletamos</h2>
+<table>
+  <tr><th>Categoria</th><th>Exemplos</th><th>De quem</th></tr>
+  <tr><td>Identificacao</td><td>Nome, data de nascimento, telefone, e-mail, endereco/cidade</td><td>Terapeuta e paciente</td></tr>
+  <tr><td>Dados sensiveis de saude</td><td>Anotacoes de sessao, respostas de anamnese, sintomas, diagnosticos, risco de auto ou heteroagressao</td><td>Paciente (via terapeuta ou formulario proprio)</td></tr>
+  <tr><td>Dados de convicção religiosa</td><td>Denominacao, visao de fe, praticas espirituais (quando o modulo estiver habilitado)</td><td>Paciente</td></tr>
+  <tr><td>Dados financeiros</td><td>Lancamentos de receita/despesa relacionados ao consultorio</td><td>Terapeuta</td></tr>
+  <tr><td>Dados de conta</td><td>E-mail e senha (hash) de acesso da terapeuta</td><td>Terapeuta</td></tr>
+</table>
+<p>
+  Dados de saude e de convicção religiosa sao <strong>dados sensiveis</strong> nos termos do art. 5º, II da
+  LGPD e recebem tratamento com salvaguardas adicionais (Row Level Security no banco de dados, acesso restrito
+  a propria terapeuta responsavel).
+</p>
+
+<h2>3. Para que usamos os dados</h2>
+<ul>
+  <li>Permitir o registro e acompanhamento clinico dos pacientes pela terapeuta contratante.</li>
+  <li>Gerar sugestoes de apoio clinico via inteligencia artificial (ver secao 5).</li>
+  <li>Gerar relatorios, agenda e controle financeiro do consultorio.</li>
+  <li>Cumprir obrigacoes legais e responder a solicitacoes de titulares de dados.</li>
+</ul>
+
+<h2>4. Base legal</h2>
+<p>
+  O tratamento de dados de saude se baseia no <strong>consentimento especifico e destacado</strong> do
+  paciente (LGPD art. 11, I), coletado no formulario de anamnese antes do preenchimento dos dados sensiveis,
+  e na <strong>tutela da saude</strong> (art. 11, II, "f"), quando aplicavel, em procedimento realizado por
+  profissional de saude.
+</p>
+
+<h2>5. Compartilhamento com terceiros</h2>
+<table>
+  <tr><th>Terceiro</th><th>Finalidade</th><th>Dados enviados</th></tr>
+  <tr><td>Supabase (hospedagem de banco de dados e autenticacao)</td><td>Armazenamento e autenticacao</td><td>Todos os dados cadastrados no sistema</td></tr>
+  <tr><td>Anthropic (provedor de IA)</td><td>Geracao de sugestoes de apoio clinico</td><td>Trecho das anotacoes de sessao/anamnese enviado no momento da analise — nao enviamos a chave de acesso nem dados de pagamento</td></tr>
+  <tr><td><span class="ph">[Gateway de pagamento, ex.: Mercado Pago]</span></td><td>Processamento de assinatura</td><td>Dados de cobranca da terapeuta contratante (nao dados de pacientes)</td></tr>
+</table>
+<p>
+  Alguns desses provedores podem processar dados fora do Brasil. Ao usar os recursos de IA, o titular
+  consente com essa transferencia internacional necessaria para a funcionalidade.
+</p>
+
+<h2>6. Seus direitos (titulares de dados)</h2>
+<p>Pacientes e terapeutas podem, a qualquer momento, solicitar:</p>
+<ul>
+  <li><strong>Acesso</strong> aos dados tratados.</li>
+  <li><strong>Correcao</strong> de dados incompletos, inexatos ou desatualizados.</li>
+  <li><strong>Portabilidade</strong> — exportacao dos dados em formato JSON, disponivel diretamente na tela
+    de Pacientes do sistema (botao "Exportar").</li>
+  <li><strong>Eliminacao/anonimizacao</strong> ("direito ao esquecimento") — disponivel diretamente na tela
+    de Pacientes do sistema (botao "Excluir"), que apaga permanentemente o cadastro, sessoes, anamneses e
+    agendamentos vinculados ao paciente.</li>
+  <li><strong>Revogacao do consentimento</strong> a qualquer momento, sem prejuizo de tratamentos anteriores
+    baseados em consentimento previamente valido.</li>
+</ul>
+<p>Solicitacoes podem ser feitas diretamente a terapeuta responsavel pelo atendimento ou pelo contato: <span class="ph">[E-MAIL DE CONTATO/DPO]</span>.</p>
+
+<h2>7. Retencao e exclusao</h2>
+<p>
+  Os dados sao mantidos enquanto a conta estiver ativa e pelo prazo adicional necessario para cumprir
+  obrigacoes legais (ex.: prontuario clinico, quando aplicavel a legislacao profissional). Apos solicitacao
+  de exclusao, os dados sao apagados do banco de producao imediatamente; copias de backup sao retidas por
+  ate <span class="ph">[PRAZO, ex.: 30 dias]</span> antes da eliminacao definitiva.
+</p>
+
+<h2>8. Seguranca</h2>
+<ul>
+  <li>Autenticacao via Supabase Auth (e-mail/senha).</li>
+  <li>Row Level Security no banco de dados: cada terapeuta acessa apenas os proprios pacientes.</li>
+  <li>Chaves de API sensiveis (IA) armazenadas apenas no servidor, nunca no navegador.</li>
+  <li>Trafego criptografado via HTTPS.</li>
+  <li>Criptografia em repouso (padrao do provedor de banco de dados).</li>
+</ul>
+
+<h2>9. Situacoes de risco/crise</h2>
+<p>
+  Este sistema nao e um servico de emergencia. Em caso de risco imediato a vida, oriente contato com o SAMU
+  (192) ou o Centro de Valorizacao da Vida — CVV (188), disponivel 24h.
+</p>
+
+<h2>10. Contato do encarregado de dados (DPO)</h2>
+<p><span class="ph">[NOME DO DPO OU RESPONSAVEL]</span> — <span class="ph">[E-MAIL DE CONTATO]</span>.</p>
+
+<footer>Este documento e um modelo educativo e nao constitui aconselhamento juridico.</footer>
+</body>
+</html>

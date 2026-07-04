@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:push": "supabase db push",
-    "fn:deploy": "supabase functions deploy analyze-session && supabase functions deploy analyze-anamnese"
+    "fn:deploy": "supabase functions deploy analyze-session && supabase functions deploy analyze-anamnese && supabase functions deploy create-subscription && supabase functions deploy mercadopago-webhook"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/Toast'
+import { createSubscription } from '../lib/billing'
+
+const PLAN_LABEL = { trial: 'Periodo de teste', basico: 'Basico', profissional: 'Profissional', cancelado: 'Cancelado' }
 
 export default function Config() {
   const { session, therapist } = useAuth()
   const { toast } = useToast()
   const [form, setForm] = useState({ full_name:'', city:'', church:'', crp:'', bio:'' })
+  const [subBusy, setSubBusy] = useState(false)
 
   useEffect(() => {
     if (therapist) setForm({
@@ -25,9 +29,45 @@ export default function Config() {
     else toast.success('Perfil atualizado.')
   }
 
+  const subscribe = async () => {
+    setSubBusy(true)
+    try {
+      const r = await createSubscription()
+      window.location.href = r.checkout_url
+    } catch (e) {
+      toast.error(e.message)
+    }
+    setSubBusy(false)
+  }
+
+  const plan = therapist?.plan || 'trial'
+  const used = therapist?.ai_calls_this_month ?? 0
+  const limit = therapist?.plan_ai_limit ?? 30
+  const pct = Math.min(100, Math.round((used / (limit || 1)) * 100))
+
   return (
     <div style={{padding:14}}>
       <div style={{marginBottom:12}}><h2 style={{fontSize:15,fontWeight:600}}>⚙️ Configuracoes</h2></div>
+
+      <div className="card" style={{marginBottom:12}}>
+        <div className="chdr">💳 Plano e uso de IA</div>
+        <div className="cbdy">
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+            <div>
+              <div style={{fontSize:13,fontWeight:600}}>{PLAN_LABEL[plan] || plan}</div>
+              <div style={{fontSize:11,color:'var(--txt2)'}}>{used} de {limit} analises de IA usadas este mes</div>
+            </div>
+            {plan !== 'profissional' && (
+              <button className="btn btn-p btn-sm" onClick={subscribe} disabled={subBusy}>
+                {subBusy ? 'Abrindo checkout…' : 'Assinar plano Profissional'}
+              </button>
+            )}
+          </div>
+          <div style={{height:6,borderRadius:4,background:'var(--bdr)',overflow:'hidden'}}>
+            <div style={{height:'100%',width:`${pct}%`,background: pct>=100?'var(--red)':'var(--p)'}} />
+          </div>
+        </div>
+      </div>
 
       <div className="card" style={{marginBottom:12}}>
         <div className="chdr">👤 Perfil profissional</div>
@@ -65,7 +105,7 @@ export default function Config() {
 
       <div className="card">
         <div className="chdr">🚀 Proximas integracoes</div>
-        {['WhatsApp (Z-API): envio de anamnese + lembretes','Google Calendar sync','Teleconsulta integrada (Daily.co)','Assinatura digital para relatorios','Cobranca automatica (Mercado Pago)','Notificacoes push (PWA)'].map(c =>
+        {['WhatsApp (Z-API): envio de anamnese + lembretes','Google Calendar sync','Teleconsulta integrada (Daily.co)','Assinatura digital para relatorios','Notificacoes push (PWA)'].map(c =>
           <div key={c} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 13px',borderBottom:'1px solid var(--bdr)',fontSize:12}}>
             {c}<span style={{fontSize:10,color:'var(--txt3)'}}>Roadmap Fase 2</span>
           </div>
