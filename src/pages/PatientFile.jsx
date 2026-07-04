@@ -1,0 +1,252 @@
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
+import { analyzeSession } from '../lib/ai'
+import { today as todayStr } from '../lib/format'
+
+export default function PatientFile() {
+  const { id } = useParams()
+  const nav = useNavigate()
+  const { session } = useAuth()
+  const [patient, setPatient] = useState(null)
+  const [sessions, setSessions] = useState([])
+  const [tab, setTab] = useState('sess')
+  const [form, setForm] = useState({ session_date: todayStr(), mode:'presencial', arrival:'', content:'', mood:5, spirit:5, openness:5, goals_done:[], next_goals:'', private_notes:'' })
+  const [ai, setAi] = useState(null)
+  const [aiLoad, setAiLoad] = useState(false)
+  const [aiErr, setAiErr] = useState(null)
+  const [saving, setSaving] = useState(false)
+
+  const load = async () => {
+    const { data: p } = await supabase.from('patients').select('*').eq('id', id).maybeSingle()
+    if (!p) { nav('/patients'); return }
+    setPatient(p)
+    const { data: s } = await supabase.from('sessions').select('*').eq('patient_id', id).order('session_date', {ascending:false})
+    setSessions(s ?? [])
+  }
+  useEffect(() => { if (session?.user) load() }, [id, session])
+
+  const toggleGoal = (g) => {
+    const list = form.goals_done.includes(g) ? form.goals_done.filter(x=>x!==g) : [...form.goals_done, g]
+    setForm({ ...form, goals_done: list })
+  }
+
+  const save = async () => {
+    if (!form.content || form.content.trim().length < 10) { alert('Preencha as anotacoes antes de salvar.'); return }
+    setSaving(true)
+    const num = sessions.length + 1
+    const { data, error } = await supabase.from('sessions').insert({
+      patient_id: id,
+      therapist_id: session.user.id,
+      session_number: num,
+      session_date: form.session_date,
+      mode: form.mode,
+      arrival: form.arrival,
+      content: form.content,
+      mood: Number(form.mood),
+      spirit: Number(form.spirit),
+      openness: Number(form.openness),
+      goals_done: form.goals_done,
+      next_goals: form.next_goals,
+      private_notes: form.private_notes,
+    }).select().single()
+    setSaving(false)
+    if (error) { alert(error.message); return }
+    setForm({ session_date: todayStr(), mode:'presencial', arrival:'', content:'', mood:5, spirit:5, openness:5, goals_done:[], next_goals:'', private_notes:'' })
+    setAi(null); setAiErr(null)
+    load()
+    return data
+  }
+
+  const analyzeCurrent = async () => {
+    // salva primeiro para ter session_id
+    const created = await save()
+    if (!created) return
+    setAiLoad(true); setAi(null); setAiErr(null)
+    try {
+      const r = await analyzeSession(created.id)
+      setAi(r.analysis)
+    } catch (e) { setAiErr(e.message) }
+    setAiLoad(false)
+  }
+
+  if (!patient) return <div style={{padding:24}}>Carregando…</div>
+
+  return (
+    <div className="pf-wrap">
+      <div className="pf-hdr">
+        <button className="pf-back" onClick={()=>nav('/patients')}>← Pacientes</button>
+        <div className="pf-card">
+          <div className="pf-avt" style={{background:patient.avatar_bg,color:patient.avatar_fg}}>{patient.initials}</div>
+          <div>
+            <div className="pf-name">{patient.full_name}</div>
+            <div className="pf-meta">
+              {patient.profession || '—'} · {patient.church || '—'} · {sessions.length} sessao(oes) · Desde {new Date(patient.started_at).toLocaleDateString('pt-BR')}
+            </div>
+          </div>
+          <div className="pf-actions">
+            <span className={`rpill r${patient.risk[0]}`} style={{fontSize:11,padding:'3px 8px'}}>Risco {patient.risk}</span>
+            <button className="btn btn-sm btn-t" onClick={()=>setTab('relatorio')}>📄 Gerar PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="tabs">
+        {[['sess','📝 Sessoes'],['ficha','🗂 Ficha'],['relatorio','📄 Relatorio']].map(([t,l]) => (
+          <button key={t} className={`tab ${tab===t?'on':''}`} onClick={()=>setTab(t)}>{l}</button>
+        ))}
+      </div>
+
+      {tab === 'sess' && (
+        <>
+          <div className="card" style={{marginBottom:12}}>
+            <div className="chdr" style={{background:'var(--pl)',color:'var(--pd)'}}>
+              <span>📝 Registro de Sessao — <strong>Sessao #{sessions.length+1}</strong></span>
+              <button className="btn btn-sm btn-p" onClick={save} disabled={saving}>{saving?'Salvando…':'Salvar sessao'}</button>
+            </div>
+            <div className="dual">
+              <div className="dp-l">
+                <div className="dp-hdr"><div className="dp-dot" style={{background:'var(--p)'}}></div>Anotacoes da Terapeuta <span style={{fontSize:10,fontWeight:400,color:'var(--txt3)',marginLeft:'auto'}}>Confidencial</span></div>
+                <div className="dp-body">
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}}>
+                    <div className="field"><label>Data</label><input type="date" value={form.session_date} onChange={e=>setForm({...form,session_date:e.target.value})} /></div>
+                    <div className="field"><label>Modalidade</label>
+                      <select value={form.mode} onChange={e=>setForm({...form,mode:e.target.value})}>
+                        <option value="presencial">Presencial</option><option value="online">Online</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="field"><label>Como o paciente chegou</label><input value={form.arrival} onChange={e=>setForm({...form,arrival:e.target.value})} placeholder="Estado emocional, postura, tom de voz..." /></div>
+                  <div className="field"><label>Conteudo da sessao</label><textarea rows={6} value={form.content} onChange={e=>setForm({...form,content:e.target.value})} placeholder="Temas abordados, falas significativas entre aspas, intervencoes..." /></div>
+                  {['mood','spirit','openness'].map((k,i)=>(
+                    <div className="field" key={k}>
+                      <label>{['😊 Humor','✨ Presenca espiritual','🔓 Abertura'][i]} — {form[k]}/10</label>
+                      <div className="sc-wrap">
+                        <input type="range" min={1} max={10} value={form[k]} onChange={e=>setForm({...form,[k]:e.target.value})} />
+                        <span className="sc-val">{form[k]}</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="field">
+                    <label>Objetivos trabalhados</label>
+                    {(patient.goals ?? []).map(g => (
+                      <label key={g} className="check-item">
+                        <input type="checkbox" checked={form.goals_done.includes(g)} onChange={()=>toggleGoal(g)} style={{accentColor:'var(--p)'}} /> {g}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="field"><label>Objetivos proxima sessao</label><textarea rows={2} value={form.next_goals} onChange={e=>setForm({...form,next_goals:e.target.value})} /></div>
+                  <div className="field"><label>Observacoes confidenciais</label><textarea rows={2} value={form.private_notes} onChange={e=>setForm({...form,private_notes:e.target.value})} /></div>
+                  <div style={{display:'flex',gap:7,marginTop:4}}>
+                    <button className="btn btn-t" onClick={analyzeCurrent} disabled={aiLoad}>{aiLoad?'Analisando…':'🧠 Salvar e analisar com IA'}</button>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="dp-hdr"><div className="dp-dot" style={{background:'var(--t)'}}></div>Analise IA de Apoio Clinico</div>
+                <div className="dp-body">
+                  {aiLoad ? <div className="loading"><div className="spin"></div>Analisando sessao…</div>
+                  : aiErr ? <div style={{padding:14,fontSize:12,color:'var(--red)'}}>{aiErr}</div>
+                  : ai ? <AISessResult r={ai} />
+                  : <div style={{padding:20,textAlign:'center',fontSize:12,color:'var(--txt2)'}}><div style={{fontSize:22,marginBottom:10}}>🧠</div>Salve e clique em <strong>Analisar com IA</strong> para receber apoio clinico.</div>}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card hist-wrap">
+            <div className="chdr">Historico de sessoes ({sessions.length})</div>
+            <div className="cbdy" style={{padding:'4px 13px'}}>
+              {sessions.length ? sessions.map(s => (
+                <div key={s.id} className="hist-row">
+                  <div className="hist-hdr">
+                    <span className="hist-num">Sessao #{s.session_number}</span>
+                    <span className="hist-date">{new Date(s.session_date).toLocaleDateString('pt-BR')}</span>
+                    <span style={{marginLeft:'auto',fontSize:10,color:'var(--txt2)'}}>😊{s.mood}/10 · ✨{s.spirit}/10</span>
+                  </div>
+                  <div className="hist-sum">{s.content}</div>
+                </div>
+              )) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhuma sessao registrada ainda.</div>}
+            </div>
+          </div>
+        </>
+      )}
+
+      {tab === 'ficha' && (
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+          <div className="card"><div className="chdr">Dados de identificacao</div><div className="cbdy">
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+              {[['Nome',patient.full_name],['Nascimento',patient.birthdate||'—'],['Profissao',patient.profession||'—'],['Cidade',patient.city||'—'],['Igreja',patient.church||'—'],['Telefone',patient.phone||'—']].map(([k,v])=>(
+                <div key={k}><div style={{fontSize:10,color:'var(--txt2)',marginBottom:1}}>{k}</div><div style={{fontSize:12,fontWeight:500}}>{v}</div></div>
+              ))}
+            </div>
+          </div></div>
+          <div className="card"><div className="chdr">Objetivos terapeuticos</div><div className="cbdy">
+            {(patient.goals ?? []).map(g=>(
+              <div key={g} style={{display:'flex',alignItems:'center',gap:7,padding:'6px 0',borderBottom:'1px solid var(--bdr)',fontSize:12}}>
+                <span style={{color:'var(--p)'}}>✓</span>{g}
+              </div>
+            ))}
+          </div></div>
+        </div>
+      )}
+
+      {tab === 'relatorio' && (
+        <div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <div><h2 style={{fontSize:15,fontWeight:600}}>Relatorio Clinico — {patient.full_name}</h2>
+              <p style={{fontSize:11,color:'var(--txt2)'}}>Documento confidencial · LGPD</p></div>
+            <button className="btn btn-t btn-sm" onClick={() => {
+              const c = document.getElementById('rpt-content')
+              document.getElementById('print-area').innerHTML = `<div class="rpt-doc">${c.innerHTML}</div>`
+              window.print()
+            }}>🖨 Imprimir / Salvar PDF</button>
+          </div>
+          <div className="rpt-doc" id="rpt-content">
+            <div className="rpt-logo"><h2>TerapiaViva</h2><p>Documento confidencial · LGPD</p></div>
+            <div className="rpt-sec"><div className="rpt-ttl">Identificacao</div><div className="rpt-grid">
+              {[['Nome',patient.full_name],['Profissao',patient.profession||'—'],['Igreja',patient.church||'—'],['Total de sessoes',sessions.length],['Nivel de risco',patient.risk.toUpperCase()],['Data',new Date().toLocaleDateString('pt-BR')]].map(([k,v])=>(
+                <div key={k} className="rpt-fld"><strong>{k}</strong>{v}</div>
+              ))}
+            </div></div>
+            <div className="rpt-sec"><div className="rpt-ttl">Objetivos Terapeuticos</div>
+              {(patient.goals ?? []).map(g=><div key={g} style={{fontSize:12,marginBottom:3}}>• {g}</div>)}
+            </div>
+            <div className="rpt-sec"><div className="rpt-ttl">Historico de Sessoes</div>
+              {sessions.length ? sessions.map(s=>(
+                <div className="rpt-sess" key={s.id}>
+                  <div className="rpt-sess-hdr">
+                    <span style={{background:'var(--tl)',color:'var(--td)',padding:'1px 7px',borderRadius:4,fontSize:11}}>Sessao #{s.session_number}</span>
+                    <span>{new Date(s.session_date).toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}</span>
+                    <span style={{marginLeft:'auto',fontSize:11,color:'var(--txt2)'}}>Humor {s.mood}/10 · Espiritual {s.spirit}/10</span>
+                  </div>
+                  <div className="rpt-sess-txt">{s.content}</div>
+                </div>
+              )) : <p style={{fontSize:12,color:'var(--txt2)'}}>Nenhuma sessao registrada.</p>}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AISessResult({ r }) {
+  const rc = {baixo:'rb', moderado:'rm', alto:'ra'}[r.nivel_sessao] || 'rm'
+  const List = ({a}) => (a||[]).map((i,idx) => <div key={idx} className="ai-li">{i}</div>)
+  return (
+    <>
+      <div className={`ai-pill ${rc}`}>⚠ Sessao: {r.nivel_sessao}</div>
+      <div className="ai-blk"><div className="ai-ttl">Observacoes clinicas</div><List a={r.observacoes_clinicas} /></div>
+      <div className="ai-blk"><div className="ai-ttl">Estado geral</div><div className="ai-focus">{r.estado_geral}</div></div>
+      <div className="ai-blk"><div className="ai-ttl">Padroes identificados</div><List a={r.padroes} /></div>
+      <div className="ai-blk"><div className="ai-ttl">Sugestoes proxima sessao</div><List a={r.sugestoes_proxima} /></div>
+      <div className="ai-blk"><div className="ai-ttl">Recursos biblicos</div>
+        {(r.versiculos||[]).map((v,i) => <div key={i} className="ai-verse"><strong>{v.ref}</strong>{v.contexto}</div>)}
+      </div>
+      {(r.alertas||[]).length ? <div className="ai-blk"><div className="ai-ttl" style={{color:'var(--red)'}}>⚠ Alertas</div><List a={r.alertas} /></div> : null}
+      <div className="ai-blk"><div className="ai-ttl">Nota para a terapeuta</div><div className="ai-note">{r.nota_terapeuta}</div></div>
+    </>
+  )
+}

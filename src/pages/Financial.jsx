@@ -1,0 +1,381 @@
+import { useEffect, useMemo, useState } from 'react'
+import {
+  ResponsiveContainer, ComposedChart, LineChart, BarChart,
+  Line, Bar, Area, CartesianGrid, XAxis, YAxis, Legend, Tooltip,
+} from 'recharts'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
+import { brl, monthLabel, monthYear } from '../lib/format'
+import FinancialTip from '../components/charts/FinancialTip'
+
+// -------- Ideias de prospeccao e formacao (conteudo estatico curado) ---------
+const PROSPECCAO = [
+  { tag: 'IGREJA', title: 'Palestras gratuitas em igrejas',
+    desc: 'Ofereca 1 palestra/mes em igrejas parceiras (Recife/Olinda/Caruaru) sobre "Ansiedade e Fe" ou "Casamento cristao restaurado". Traga cartao QR de agendamento.' },
+  { tag: 'IGREJA', title: 'Ministerio de casais e grupos de mulheres',
+    desc: 'Facilite 1 encontro trimestral em ministerios de casais e grupos de mulheres batistas. Segmenta pacientes ideais.' },
+  { tag: 'REDES', title: 'Instagram — 3 Reels por semana',
+    desc: 'Formato: "3 versiculos para a semana de ansiedade" · "Perguntas frequentes do consultorio" · "Antes/depois da terapia crista".' },
+  { tag: 'REDES', title: 'YouTube Shorts + podcast semanal',
+    desc: 'Grave 1 episodio de 15 min por semana (ancorado em livro do mes). Repurpose em Shorts, Reels e Tiktok.' },
+  { tag: 'PARCERIA', title: 'Rede de profissionais cristaos',
+    desc: 'Firme parceria com 3 psiquiatras, 2 nutricionistas, 1 fisioterapeuta cristaos. Encaminhamentos cruzados com comissao ou reciprocidade.' },
+  { tag: 'PARCERIA', title: 'Radio cristas locais',
+    desc: 'Coluna semanal fixa em radio cristas de Recife (Radio 96.1, Radio Novas de Paz). Reforca autoridade e SEO local.' },
+  { tag: 'DIGITAL', title: 'Blog + SEO local',
+    desc: 'Publique 2 artigos/mes: "aconselhamento biblico Recife", "terapia crista Olinda". Google Business Profile com posts semanais.' },
+  { tag: 'DIGITAL', title: 'Anuncios Meta e Google',
+    desc: 'R$300/mes segmentando mulheres 30-55, evangelicas, PE. Landing page unica de captura para trial (chamada gratuita de 20 min).' },
+  { tag: 'RETENCAO', title: 'Programa Indicacao Abencoada',
+    desc: 'Paciente que indica 3 e nova sessao gratuita. Comunique por WhatsApp com cartao personalizado.' },
+  { tag: 'PRODUTO', title: 'Workshop pago mensal (R$97-297)',
+    desc: 'Temas: "Cura interior em 8 encontros" · "Casamento restaurado" · "Ansiedade e paz". Escala receita sem escalar sessoes 1-a-1.' },
+  { tag: 'PRODUTO', title: 'Retiros trimestrais (3 dias)',
+    desc: 'Parceria com pousada crista. 20-30 vagas a R$1.200 cada. Margem alta + geracao de leads para acompanhamento.' },
+  { tag: 'CRM', title: 'Reativacao de ex-pacientes',
+    desc: 'A cada 90 dias, WhatsApp de acolhimento com versiculo personalizado. Historico mostra 15-25% de retorno.' },
+]
+
+const FORMACAO = [
+  { tag: 'CURSO', title: 'Aconselhamento Biblico Noutetico (CACP)',
+    desc: 'Curso de referencia no Brasil — 12 modulos. Base para autoridade academica no nicho.' },
+  { tag: 'CURSO', title: 'Trauma-Focused CBT (Beck Institute)',
+    desc: 'Padrao internacional para trauma. Curso online, certificado reconhecido.' },
+  { tag: 'CURSO', title: 'Certificacao em ACT (Acceptance & Commitment Therapy)',
+    desc: 'Aprofunda repertorio para ansiedade e defusao cognitiva — combina bem com espiritualidade.' },
+  { tag: 'CURSO', title: 'Formacao em EMDR nivel 1 e 2',
+    desc: 'Padrao ouro para trauma. Investimento alto (R$8-15k) mas eleva ticket medio 40-60%.' },
+  { tag: 'CURSO', title: 'Especializacao em Terapia do Casal Crista',
+    desc: 'FAT-BR, IBP ou Instituto Ellel — direciona posicionamento premium para casais evangelicos.' },
+  { tag: 'LIVRO', title: 'Aconselhamento Biblico — Jay Adams',
+    desc: 'Fundacao teologica noutetica. Leitura obrigatoria para o nicho.' },
+  { tag: 'LIVRO', title: 'Corpo Guarda as Marcas — Bessel van der Kolk',
+    desc: 'Ponte com neurociencia do trauma. Base para intervencoes somaticas.' },
+  { tag: 'LIVRO', title: 'Como Mudar o Coracao — Paul Tripp',
+    desc: 'Modelo de mudanca centrado na graca — util para pacientes em estagnacao espiritual.' },
+  { tag: 'EVENTO', title: 'Congresso Brasileiro de Aconselhamento Biblico',
+    desc: 'Anual. Networking + palestrantes internacionais + venda direta de servicos no local.' },
+  { tag: 'EVENTO', title: 'Conferencia Fiel para pastores',
+    desc: 'Alcanca pastores que encaminham pacientes. Presenca com stand vale ate 6 novos pacientes.' },
+  { tag: 'SUPERV', title: 'Grupo de supervisao clinica com pares',
+    desc: 'Formar/participar de grupo quinzenal com 4-6 terapeutas cristas. Reduz burnout e afina casos.' },
+  { tag: 'GESTAO', title: 'Sebrae — Gestao para profissionais liberais',
+    desc: 'Curso gratuito. Aperfeicoa precificacao, tributacao PJ e fluxo de caixa.' },
+]
+
+// -----------------------------------------------------------------------------
+// Helpers de dados
+// -----------------------------------------------------------------------------
+
+function buildMonthlySeries(rows) {
+  // Recebe rows da view v_financial_monthly (2 anos) e devolve:
+  //  - series de 12 meses do ano atual com comparacao YoY
+  const map = {}
+  rows.forEach((r) => { map[r.month.slice(0, 7)] = r })
+
+  const out = []
+  const now = new Date()
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = d.toISOString().slice(0, 7)
+    const prev = new Date(d.getFullYear() - 1, d.getMonth(), 1).toISOString().slice(0, 7)
+    const cur = map[key]
+    const yoy = map[prev]
+    out.push({
+      key,
+      label: monthLabel(d.toISOString()),
+      revenue: Number(cur?.revenue ?? 0),
+      expenses: Number(cur?.expenses ?? 0),
+      net: Number(cur?.net ?? 0),
+      revenue_prev: Number(yoy?.revenue ?? 0),
+      net_prev: Number(yoy?.net ?? 0),
+    })
+  }
+  return out
+}
+
+// -----------------------------------------------------------------------------
+export default function Financial() {
+  const { session } = useAuth()
+  const [monthly, setMonthly] = useState([])
+  const [byCat, setByCat] = useState([])
+  const [entries, setEntries] = useState([])
+  const [tab, setTab] = useState('receita')
+  const [form, setForm] = useState({ kind: 'receita', category: 'sessao', description: '', amount: '', entry_date: new Date().toISOString().slice(0,10), status: 'pago' })
+
+  useEffect(() => {
+    if (!session?.user) return
+    const uid = session.user.id
+    Promise.all([
+      supabase.from('v_financial_monthly').select('*').eq('therapist_id', uid).order('month'),
+      supabase.from('v_financial_by_category').select('*').eq('therapist_id', uid),
+      supabase.from('financial_entries').select('*').eq('therapist_id', uid).order('entry_date', {ascending:false}).limit(20),
+    ]).then(([m, c, e]) => {
+      setMonthly(m.data ?? [])
+      setByCat(c.data ?? [])
+      setEntries(e.data ?? [])
+    })
+  }, [session])
+
+  const series = useMemo(() => buildMonthlySeries(monthly), [monthly])
+
+  // KPIs do mes vigente
+  const kpis = useMemo(() => {
+    const now = series[series.length - 1] || {}
+    const prev = series[series.length - 2] || {}
+    const yoy = now.revenue_prev || 0
+    return {
+      revenue_month: now.revenue || 0,
+      expenses_month: now.expenses || 0,
+      net_month: now.net || 0,
+      yoy_delta_pct: yoy ? ((now.revenue - yoy) / yoy) * 100 : 0,
+      mom_delta_pct: prev.revenue ? ((now.revenue - prev.revenue) / prev.revenue) * 100 : 0,
+      revenue_12m: series.reduce((s, r) => s + (r.revenue || 0), 0),
+      expenses_12m: series.reduce((s, r) => s + (r.expenses || 0), 0),
+    }
+  }, [series])
+
+  // Composicao por categoria (receita/despesa)
+  const catData = useMemo(() => {
+    const agg = {}
+    byCat.forEach((r) => {
+      const key = r.category
+      agg[key] = agg[key] || { name: key, receita: 0, despesa: 0 }
+      agg[key][r.kind === 'receita' ? 'receita' : 'despesa'] += Number(r.total)
+    })
+    return Object.values(agg).sort((a, b) => (b.receita + b.despesa) - (a.receita + a.despesa))
+  }, [byCat])
+
+  async function addEntry(e) {
+    e.preventDefault()
+    if (!form.description || !form.amount) return
+    const { error } = await supabase.from('financial_entries').insert({
+      therapist_id: session.user.id,
+      kind: form.kind, category: form.category, description: form.description,
+      amount: Number(form.amount), entry_date: form.entry_date, status: form.status,
+    })
+    if (error) { alert(error.message); return }
+    setForm({ ...form, description: '', amount: '' })
+    // refresh
+    const uid = session.user.id
+    const [m, c, l] = await Promise.all([
+      supabase.from('v_financial_monthly').select('*').eq('therapist_id', uid).order('month'),
+      supabase.from('v_financial_by_category').select('*').eq('therapist_id', uid),
+      supabase.from('financial_entries').select('*').eq('therapist_id', uid).order('entry_date', {ascending:false}).limit(20),
+    ])
+    setMonthly(m.data ?? []); setByCat(c.data ?? []); setEntries(l.data ?? [])
+  }
+
+  return (
+    <div style={{padding:14}}>
+      <div style={{marginBottom:12}}>
+        <h2 style={{fontSize:15,fontWeight:600}}>💰 Gestao Financeira</h2>
+        <p style={{fontSize:11,color:'var(--txt2)'}}>Comparativo 12 meses com YoY (year-over-year), composicao por categoria e ideias de crescimento.</p>
+      </div>
+
+      {/* ---------- KPIs do mes ---------- */}
+      <div className="stats stats-4">
+        <div className="sc">
+          <div className="sl">Receita do mes</div>
+          <div className="sv" style={{color:'#27500A'}}>{brl(kpis.revenue_month)}</div>
+          <div className="ss">
+            {kpis.mom_delta_pct >= 0 ? '📈' : '📉'} {kpis.mom_delta_pct.toFixed(1)}% vs mes anterior
+          </div>
+        </div>
+        <div className="sc">
+          <div className="sl">Despesas do mes</div>
+          <div className="sv" style={{color:'var(--red)'}}>{brl(kpis.expenses_month)}</div>
+          <div className="ss">Fluxo controlado</div>
+        </div>
+        <div className="sc">
+          <div className="sl">Liquido</div>
+          <div className="sv" style={{color:'var(--p)'}}>{brl(kpis.net_month)}</div>
+          <div className="ss">Margem: {kpis.revenue_month ? ((kpis.net_month/kpis.revenue_month)*100).toFixed(0) : 0}%</div>
+        </div>
+        <div className="sc">
+          <div className="sl">Comparativo YoY</div>
+          <div className="sv" style={{color: kpis.yoy_delta_pct>=0?'var(--p)':'var(--red)'}}>{kpis.yoy_delta_pct>=0?'+':''}{kpis.yoy_delta_pct.toFixed(1)}%</div>
+          <div className="ss">vs mesmo mes ano passado</div>
+        </div>
+      </div>
+
+      {/* ---------- Grafico principal: Receita x Despesa x YoY ---------- */}
+      <div className="card" style={{margin:'12px 0'}}>
+        <div className="chdr">
+          <span>📊 12 meses — Receita, Despesa e Comparativo com Ano Anterior</span>
+          <span style={{fontSize:10,color:'var(--txt3)'}}>Total 12M: {brl(kpis.revenue_12m)}</span>
+        </div>
+        <div className="cbdy" style={{padding:'12px 8px 6px'}}>
+          <ResponsiveContainer width="100%" height={280}>
+            <ComposedChart data={series} margin={{top:8,right:16,left:-8,bottom:0}}>
+              <defs>
+                <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1D9E75" stopOpacity={0.35}/>
+                  <stop offset="100%" stopColor="#1D9E75" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#DDE8E5" />
+              <XAxis dataKey="label" tick={{fontSize:11,fill:'#556866'}} />
+              <YAxis tick={{fontSize:11,fill:'#556866'}} tickFormatter={(v)=>`R$${(v/1000).toFixed(0)}k`} />
+              <Tooltip content={<FinancialTip />} />
+              <Legend wrapperStyle={{fontSize:11}} iconType="circle" />
+              <Area type="monotone" dataKey="revenue" name="Receita" stroke="#1D9E75" strokeWidth={2} fill="url(#gRev)" />
+              <Bar dataKey="expenses" name="Despesa" fill="#A32D2D" opacity={0.75} radius={[4,4,0,0]} barSize={16} />
+              <Line type="monotone" dataKey="revenue_prev" name="Receita ano anterior" stroke="#534AB7" strokeDasharray="5 5" strokeWidth={2} dot={false} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ---------- Grafico Liquido comparado ---------- */}
+      <div className="cgrid" style={{margin:'0 0 12px', gridTemplateColumns:'1fr 1fr'}}>
+        <div className="card">
+          <div className="chdr">📈 Liquido — este ano vs ano anterior</div>
+          <div className="cbdy" style={{padding:'12px 8px 6px'}}>
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={series} margin={{top:8,right:16,left:-8,bottom:0}}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#DDE8E5" />
+                <XAxis dataKey="label" tick={{fontSize:11,fill:'#556866'}} />
+                <YAxis tick={{fontSize:11,fill:'#556866'}} tickFormatter={(v)=>`R$${(v/1000).toFixed(0)}k`} />
+                <Tooltip content={<FinancialTip />} />
+                <Legend wrapperStyle={{fontSize:11}} iconType="circle" />
+                <Line type="monotone" dataKey="net" name="Liquido atual" stroke="#1D9E75" strokeWidth={2.5} dot={{r:3}} />
+                <Line type="monotone" dataKey="net_prev" name="Liquido ano anterior" stroke="#8FA8A5" strokeDasharray="5 5" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="chdr">🎯 Composicao por categoria (12 meses)</div>
+          <div className="cbdy" style={{padding:'12px 8px 6px'}}>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={catData} layout="vertical" margin={{top:4,right:16,left:20,bottom:0}}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#DDE8E5" />
+                <XAxis type="number" tick={{fontSize:11,fill:'#556866'}} tickFormatter={(v)=>`R$${(v/1000).toFixed(0)}k`} />
+                <YAxis type="category" dataKey="name" tick={{fontSize:11,fill:'#556866'}} width={90} />
+                <Tooltip content={<FinancialTip />} />
+                <Legend wrapperStyle={{fontSize:11}} iconType="circle" />
+                <Bar dataKey="receita" name="Receita" fill="#1D9E75" radius={[0,4,4,0]} />
+                <Bar dataKey="despesa" name="Despesa" fill="#A32D2D" radius={[0,4,4,0]} opacity={0.85} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- Novo lancamento + tabela recente ---------- */}
+      <div className="cgrid" style={{margin:'0 0 12px', gridTemplateColumns:'1fr 1.4fr'}}>
+        <div className="card">
+          <div className="chdr">➕ Novo lancamento</div>
+          <div className="cbdy">
+            <form onSubmit={addEntry}>
+              <div className="field">
+                <label>Tipo</label>
+                <select value={form.kind} onChange={(e)=>setForm({...form, kind:e.target.value, category: e.target.value==='receita'?'sessao':'aluguel'})}>
+                  <option value="receita">Receita</option>
+                  <option value="despesa">Despesa</option>
+                </select>
+              </div>
+              <div className="field">
+                <label>Categoria</label>
+                <select value={form.category} onChange={(e)=>setForm({...form, category:e.target.value})}>
+                  {form.kind==='receita' ? (
+                    <>
+                      <option value="sessao">Sessao</option>
+                      <option value="pacote">Pacote</option>
+                      <option value="workshop">Workshop</option>
+                      <option value="palestra">Palestra</option>
+                      <option value="outros">Outros</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="aluguel">Aluguel</option>
+                      <option value="plataforma">Plataforma</option>
+                      <option value="marketing">Marketing</option>
+                      <option value="formacao">Formacao</option>
+                      <option value="material">Material</option>
+                      <option value="impostos">Impostos</option>
+                      <option value="outros">Outros</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              <div className="field">
+                <label>Descricao</label>
+                <input value={form.description} onChange={(e)=>setForm({...form, description:e.target.value})} placeholder="Ex.: Sessao Maria das Gracas" required />
+              </div>
+              <div className="field">
+                <label>Valor (R$)</label>
+                <input type="number" step="0.01" value={form.amount} onChange={(e)=>setForm({...form, amount:e.target.value})} required />
+              </div>
+              <div className="field">
+                <label>Data</label>
+                <input type="date" value={form.entry_date} onChange={(e)=>setForm({...form, entry_date:e.target.value})} />
+              </div>
+              <button className="btn btn-p" type="submit" style={{width:'100%',marginTop:6}}>Salvar lancamento</button>
+            </form>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="chdr">📒 Ultimos lancamentos</div>
+          <div className="cbdy" style={{padding:'2px 13px'}}>
+            {entries.length ? entries.map((m) => (
+              <div key={m.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--bdr)'}}>
+                <div>
+                  <div style={{fontSize:12,fontWeight:500}}>{m.description}</div>
+                  <div style={{fontSize:10,color:'var(--txt2)'}}>{new Date(m.entry_date).toLocaleDateString('pt-BR')} · {m.category} · {m.status}</div>
+                </div>
+                <span style={{fontSize:13,fontWeight:600,color: m.kind==='receita' ? '#27500A' : 'var(--red)'}}>
+                  {m.kind==='receita' ? '+ ' : '- '}{brl(m.amount)}
+                </span>
+              </div>
+            )) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhum lancamento — comece pelo formulario ao lado.</div>}
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- BLOCO: Ideias de prospeccao e aperfeicoamento ---------- */}
+      <div className="card" style={{marginBottom:14}}>
+        <div className="chdr" style={{background:'linear-gradient(90deg, var(--pl), var(--tl))'}}>
+          <span>🚀 Crescimento — Prospeccao de clientes e aperfeicoamento profissional</span>
+          <span style={{fontSize:10,color:'var(--txt3)'}}>Curadoria para terapeuta biblica crista</span>
+        </div>
+        <div className="cbdy">
+          <div className="prosp-grid">
+            <div className="prosp-card">
+              <h3>🌱 Prospeccao de clientes</h3>
+              <ul>
+                {PROSPECCAO.map((it, i) => (
+                  <li key={i}>
+                    <strong><span className={`prosp-tag ${it.tag==='REDES'||it.tag==='DIGITAL'?'t':''}${it.tag==='RETENCAO'||it.tag==='PRODUTO'||it.tag==='CRM'?'a':''}`}>{it.tag}</span>{it.title}</strong>
+                    {it.desc}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="prosp-card">
+              <h3>🎓 Aperfeicoamento profissional</h3>
+              <ul>
+                {FORMACAO.map((it, i) => (
+                  <li key={i}>
+                    <strong><span className={`prosp-tag ${it.tag==='CURSO'?'':it.tag==='LIVRO'?'t':'a'}`}>{it.tag}</span>{it.title}</strong>
+                    {it.desc}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="callout clprv" style={{marginTop:14}}>
+            <strong>💡 Metas de crescimento sugeridas para 90 dias</strong>
+            1) Publicar 24 conteudos (Reels/Blog) · 2) Fechar 2 parcerias com igrejas · 3) Lancar 1 workshop pago ·
+            4) Iniciar 1 curso de aperfeicoamento (ACT ou EMDR) · 5) Reativar 10 ex-pacientes por WhatsApp com versiculo personalizado ·
+            6) Alcancar +25% de receita YoY no proximo trimestre.
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
