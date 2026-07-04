@@ -5,10 +5,11 @@ import {
 } from 'recharts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { brl, monthLabel, monthYear } from '../lib/format'
+import { brl, monthLabel } from '../lib/format'
 import FinancialTip from '../components/charts/FinancialTip'
 import { useToast } from '../components/Toast'
 import { PROSPECCAO, FORMACAO } from '../data/growthIdeas'
+import { entriesToCsv, monthlySummaryToCsv, downloadCsv } from '../lib/exportFinancial'
 
 // -----------------------------------------------------------------------------
 // Helpers de dados
@@ -41,19 +42,27 @@ function buildMonthlySeries(rows) {
   return out
 }
 
+function defaultRange() {
+  const now = new Date()
+  const from = new Date(now.getFullYear(), 0, 1).toISOString().slice(0, 10)
+  const to = now.toISOString().slice(0, 10)
+  return { from, to }
+}
+
 // -----------------------------------------------------------------------------
 export default function Financial() {
-  const { session } = useAuth()
+  const { session, ownerId, hasFinancialAccess } = useAuth()
   const { toast } = useToast()
   const [monthly, setMonthly] = useState([])
   const [byCat, setByCat] = useState([])
   const [entries, setEntries] = useState([])
-  const [tab, setTab] = useState('receita')
   const [form, setForm] = useState({ kind: 'receita', category: 'sessao', description: '', amount: '', entry_date: new Date().toISOString().slice(0,10), status: 'pago' })
+  const [range, setRange] = useState(defaultRange())
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
-    if (!session?.user) return
-    const uid = session.user.id
+    if (!session?.user || !ownerId || !hasFinancialAccess) return
+    const uid = ownerId
     Promise.all([
       supabase.from('v_financial_monthly').select('*').eq('therapist_id', uid).order('month'),
       supabase.from('v_financial_by_category').select('*').eq('therapist_id', uid),
@@ -63,7 +72,7 @@ export default function Financial() {
       setByCat(c.data ?? [])
       setEntries(e.data ?? [])
     })
-  }, [session])
+  }, [session, ownerId, hasFinancialAccess])
 
   const series = useMemo(() => buildMonthlySeries(monthly), [monthly])
 
@@ -99,7 +108,7 @@ export default function Financial() {
     if (!form.description || !form.amount) return
     if (Number(form.amount) <= 0) { toast.error('Informe um valor maior que zero.'); return }
     const { error } = await supabase.from('financial_entries').insert({
-      therapist_id: session.user.id,
+      therapist_id: ownerId,
       kind: form.kind, category: form.category, description: form.description,
       amount: Number(form.amount), entry_date: form.entry_date, status: form.status,
     })
@@ -107,13 +116,42 @@ export default function Financial() {
     toast.success('Lancamento salvo.')
     setForm({ ...form, description: '', amount: '' })
     // refresh
-    const uid = session.user.id
+    const uid = ownerId
     const [m, c, l] = await Promise.all([
       supabase.from('v_financial_monthly').select('*').eq('therapist_id', uid).order('month'),
       supabase.from('v_financial_by_category').select('*').eq('therapist_id', uid),
       supabase.from('financial_entries').select('*').eq('therapist_id', uid).order('entry_date', {ascending:false}).limit(20),
     ])
     setMonthly(m.data ?? []); setByCat(c.data ?? []); setEntries(l.data ?? [])
+  }
+
+  async function exportEntriesCsv() {
+    setExporting(true)
+    const { data, error } = await supabase.from('financial_entries')
+      .select('*').eq('therapist_id', ownerId)
+      .gte('entry_date', range.from).lte('entry_date', range.to)
+      .order('entry_date', { ascending: true })
+    setExporting(false)
+    if (error) { toast.error(error.message); return }
+    if (!data?.length) { toast.error('Nenhum lancamento no periodo selecionado.'); return }
+    downloadCsv(`lancamentos-financeiros_${range.from}_a_${range.to}.csv`, entriesToCsv(data))
+    toast.success(`${data.length} lancamento(s) exportado(s).`)
+  }
+
+  function exportMonthlySummaryCsv() {
+    if (!series.length) { toast.error('Sem dados mensais para exportar.'); return }
+    downloadCsv(`resumo-mensal_${series[0].key}_a_${series[series.length-1].key}.csv`, monthlySummaryToCsv(series))
+    toast.success('Resumo mensal exportado.')
+  }
+
+  if (!hasFinancialAccess) {
+    return (
+      <div style={{padding:14}}>
+        <div className="card"><div className="cbdy" style={{padding:'22px 16px',textAlign:'center',fontSize:12.5,color:'var(--txt2)'}}>
+          Seu papel na equipe nao tem acesso aos dados financeiros da clinica.
+        </div></div>
+      </div>
+    )
   }
 
   return (
@@ -210,6 +248,29 @@ export default function Financial() {
                 <Bar dataKey="despesa" name="Despesa" fill="#A32D2D" radius={[0,4,4,0]} opacity={0.85} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------- Exportacao ---------- */}
+      <div className="card" style={{marginBottom:12}}>
+        <div className="chdr">📤 Exportar dados financeiros</div>
+        <div className="cbdy">
+          <div style={{display:'flex',alignItems:'flex-end',gap:10,flexWrap:'wrap',marginBottom:10}}>
+            <div className="field" style={{marginBottom:0}}><label>De</label><input type="date" value={range.from} onChange={e=>setRange({...range,from:e.target.value})} /></div>
+            <div className="field" style={{marginBottom:0}}><label>Ate</label><input type="date" value={range.to} onChange={e=>setRange({...range,to:e.target.value})} /></div>
+            <button className="btn btn-p btn-sm" onClick={exportEntriesCsv} disabled={exporting}>
+              {exporting ? 'Exportando…' : '⬇ Exportar lancamentos (CSV)'}
+            </button>
+            <button className="btn btn-sm" onClick={exportMonthlySummaryCsv}>⬇ Exportar resumo mensal (CSV)</button>
+          </div>
+          <p style={{fontSize:11,color:'var(--txt2)'}}>Os arquivos CSV abrem diretamente no Excel, Google Sheets ou LibreOffice.</p>
+          <div className="callout clwrn" style={{marginTop:10}}>
+            <strong>Nota fiscal eletronica (NF-e/NFS-e)</strong>
+            A emissao de nota fiscal exige integracao com um provedor fiscal (ex.: Focus NFe, eNotas, NFe.io),
+            certificado digital e dados tributarios (CNPJ, regime, municipio) proprios de cada terapeuta —
+            por isso nao esta incluida automaticamente. Quando tiver esses dados, e possivel integrar um desses
+            provedores via uma nova Edge Function, seguindo o mesmo padrao usado para Mercado Pago.
           </div>
         </div>
       </div>

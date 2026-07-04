@@ -3,18 +3,19 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { SITE } from '../config/site'
+import OnboardingChecklist from '../components/OnboardingChecklist'
 
 const VERSE = { r:'Salmo 23', t:'O Senhor e o meu Pastor; nada me faltara.' }
 
 export default function Dashboard() {
-  const { therapist, session } = useAuth()
+  const { therapist, profile, session, ownerId } = useAuth()
   const [kpis, setKpis] = useState({})
   const [patients, setPatients] = useState([])
   const [todayAppts, setTodayAppts] = useState([])
 
   useEffect(() => {
-    if (!session?.user) return
-    const uid = session.user.id
+    if (!session?.user || !ownerId) return
+    const uid = ownerId
     const today = new Date(); today.setHours(0,0,0,0)
     const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1)
 
@@ -28,15 +29,31 @@ export default function Dashboard() {
       setPatients(p.data ?? [])
       setTodayAppts(a.data ?? [])
     })
-  }, [session])
+  }, [session, ownerId])
 
-  const first = (therapist?.full_name || SITE.therapistName || 'Terapeuta').split(' ')[0]
+  const first = (profile?.full_name || SITE.therapistName || 'Terapeuta').split(' ')[0]
   const dayStr = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
   const hasToday = todayAppts.length
   const hasPending = (kpis.pending_anamneses ?? 0) > 0
+  const riskAlerts = kpis.unresolved_risk_alerts ?? 0
 
   return (
     <div>
+      <OnboardingChecklist />
+
+      {riskAlerts > 0 && (
+        <Link to="/alertas" style={{ textDecoration: 'none' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10, background: '#FBE4E4', color: '#A32D2D',
+            border: '1px solid #f0b8b8', borderRadius: 10, padding: '11px 16px', marginBottom: 14, fontSize: 13,
+          }}>
+            <span style={{ fontSize: 18 }}>🚨</span>
+            <strong>{riskAlerts} alerta{riskAlerts > 1 ? 's' : ''} de risco nao resolvido{riskAlerts > 1 ? 's' : ''}</strong>
+            <span style={{ marginLeft: 'auto', fontSize: 12, textDecoration: 'underline' }}>Ver alertas →</span>
+          </div>
+        </Link>
+      )}
+
       <div className="hero">
         <div className="hero-txt">
           <h1>Bom dia, {first} 🌿</h1>

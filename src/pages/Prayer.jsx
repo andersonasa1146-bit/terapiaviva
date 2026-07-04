@@ -3,23 +3,23 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Prayer() {
-  const { session } = useAuth()
+  const { session, ownerId } = useAuth()
   const [items, setItems] = useState([])
   const [text, setText] = useState('')
   const [patients, setPatients] = useState([])
   const [pid, setPid] = useState('')
 
   const load = () => {
-    supabase.from('prayer_requests').select('*, patients:patient_id (full_name, initials)').eq('therapist_id', session.user.id).order('created_at', {ascending:false}).then(({data}) => setItems(data ?? []))
-    supabase.from('patients').select('id, full_name').eq('therapist_id', session.user.id).then(({data}) => setPatients(data ?? []))
+    supabase.from('prayer_requests').select('*, patients:patient_id (full_name, initials)').eq('therapist_id', ownerId).order('created_at', {ascending:false}).then(({data}) => setItems(data ?? []))
+    supabase.from('patients').select('id, full_name').eq('therapist_id', ownerId).then(({data}) => setPatients(data ?? []))
   }
-  useEffect(() => { if (session?.user) load() }, [session])
+  useEffect(() => { if (session?.user && ownerId) load() }, [session, ownerId])
 
   const add = async (e) => {
     e.preventDefault()
     if (!text) return
     await supabase.from('prayer_requests').insert({
-      therapist_id: session.user.id, patient_id: pid || null, intention: text,
+      therapist_id: ownerId, patient_id: pid || null, intention: text,
     })
     setText(''); setPid(''); load()
   }

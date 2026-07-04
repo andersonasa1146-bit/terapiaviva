@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import { captureException } from '../lib/sentry'
 
 // Evita que um erro de render em qualquer tela derrube o app inteiro
 // (fundamental num sistema usado durante o atendimento de pacientes).
@@ -15,6 +16,9 @@ export default class ErrorBoundary extends Component {
   componentDidCatch(error, info) {
     // eslint-disable-next-line no-console
     console.error('[TerapiaViva] Erro nao tratado:', error, info)
+    // Task #32: envia para o Sentry quando VITE_SENTRY_DSN estiver
+    // configurada; sem isso, e um no-op silencioso.
+    captureException(error, { componentStack: info?.componentStack })
   }
 
   render() {

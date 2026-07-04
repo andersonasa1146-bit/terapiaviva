@@ -12,6 +12,10 @@
 // (terapeutas nao estao autenticadas quando o MP chama este webhook).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { initSentry, captureError } from "../_shared/sentry.ts";
+import { checkRateLimit, clientIp } from "../_shared/rateLimit.ts";
+
+initSentry("mercadopago-webhook");
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
@@ -22,6 +26,13 @@ Deno.serve(async (req) => {
   if (!mpToken || !serviceKey || !supabaseUrl) {
     return new Response(JSON.stringify({ error: "Webhook nao configurado (faltam secrets)" }), { status: 501 });
   }
+
+  const supabase = createClient(supabaseUrl, serviceKey);
+
+  // Rate limit por IP — generoso, pois o Mercado Pago pode chamar em rajada,
+  // mas ainda protege contra bots martelando o endpoint publico.
+  const rl = await checkRateLimit(supabase, `mercadopago-webhook:${clientIp(req)}`, 120, 60);
+  if (!rl) return new Response(JSON.stringify({ error: "Muitas requisicoes" }), { status: 429 });
 
   try {
     const body = await req.json().catch(() => ({}));
@@ -45,8 +56,6 @@ Deno.serve(async (req) => {
     const therapistId = preapproval.external_reference;
     if (!therapistId) return new Response(JSON.stringify({ ok: true, ignored: true }), { status: 200 });
 
-    const supabase = createClient(supabaseUrl, serviceKey);
-
     // Mapeia status do MP (authorized, paused, cancelled, pending) para o plano.
     const status = preapproval.status as string;
     const patch: Record<string, unknown> = { mp_subscription_status: status };
@@ -61,6 +70,7 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
   } catch (e) {
+    captureError(e, { function: "mercadopago-webhook" });
     return new Response(JSON.stringify({ error: String((e as Error).message ?? e) }), { status: 500 });
   }
 });

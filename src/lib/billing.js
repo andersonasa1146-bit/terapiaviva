@@ -20,3 +20,24 @@ async function callFunction(name, payload = {}) {
 // Lanca erro com mensagem amigavel se a cobranca ainda nao estiver configurada
 // (MERCADOPAGO_ACCESS_TOKEN ausente no servidor).
 export const createSubscription = () => callFunction('create-subscription')
+
+// --- Cobranca de pacientes (token Mercado Pago pessoal da terapeuta) ------
+
+export const chargePatient = (patientId, amount, description, sessionId) =>
+  callFunction('charge-patient', { patient_id: patientId, amount, description, session_id: sessionId })
+
+export async function setPatientMpToken(token) {
+  const { error } = await supabase.rpc('set_patient_mp_token', { p_token: token })
+  if (error) throw error
+}
+
+export async function clearPatientMpToken() {
+  const { error } = await supabase.rpc('clear_patient_mp_token')
+  if (error) throw error
+}
+
+export async function hasPatientMpToken() {
+  const { data, error } = await supabase.rpc('has_patient_mp_token')
+  if (error) throw error
+  return !!data
+}

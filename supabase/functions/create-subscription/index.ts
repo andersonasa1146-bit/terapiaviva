@@ -11,6 +11,10 @@
 // responde 501 (nao implementado) para nao quebrar o restante do app.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { initSentry, captureError } from "../_shared/sentry.ts";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
+
+initSentry("create-subscription");
 
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "*")
   .split(",").map((o) => o.trim()).filter(Boolean);
@@ -50,6 +54,11 @@ Deno.serve(async (req) => {
     });
     const { data: userRes } = await supabase.auth.getUser();
     if (!userRes?.user) return json(corsHeaders, { error: "Sessao invalida" }, 401);
+
+    // Rate limit de curto prazo (evita criar preapprovals duplicados no MP
+    // por cliques repetidos no botao de assinar).
+    const rl = await checkRateLimit(supabase, `create-subscription:${userRes.user.id}`, 5, 60);
+    if (!rl) return rateLimitResponse(corsHeaders);
 
     const { data: therapist } = await supabase
       .from("therapists").select("full_name, email").eq("id", userRes.user.id).maybeSingle();
@@ -94,6 +103,7 @@ Deno.serve(async (req) => {
 
     return json(corsHeaders, { ok: true, checkout_url: mpData.init_point ?? mpData.sandbox_init_point });
   } catch (e) {
+    captureError(e, { function: "create-subscription" });
     return json(corsHeaders, { error: String((e as Error).message ?? e) }, 500);
   }
 });

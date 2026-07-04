@@ -13,7 +13,7 @@ module.exports = {
     ecmaFeatures: { jsx: true },
   },
   settings: { react: { version: 'detect' } },
-  ignorePatterns: ['dist', 'node_modules', 'supabase/functions/**'],
+  ignorePatterns: ['dist', 'node_modules', 'supabase/functions/**', 'playwright-report', 'test-results'],
   rules: {
     'react/prop-types': 'off',
     'react/react-in-jsx-scope': 'off',

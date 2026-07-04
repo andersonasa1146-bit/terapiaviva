@@ -19,5 +19,6 @@ async function callFunction(name, payload) {
   return body
 }
 
-export const analyzeSession   = (sessionId)   => callFunction('analyze-session',   { session_id: sessionId })
-export const analyzeAnamnesis = (anamnesisId) => callFunction('analyze-anamnese', { anamnesis_id: anamnesisId })
+export const analyzeSession    = (sessionId)   => callFunction('analyze-session',   { session_id: sessionId })
+export const analyzeAnamnesis  = (anamnesisId) => callFunction('analyze-anamnese', { anamnesis_id: anamnesisId })
+export const transcribeSession = (sessionId)   => callFunction('transcribe-session', { session_id: sessionId })

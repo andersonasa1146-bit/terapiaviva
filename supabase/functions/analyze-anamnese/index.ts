@@ -3,6 +3,10 @@
 // Gera avaliacao preliminar da anamnese enviada pelo paciente.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { initSentry, captureError } from "../_shared/sentry.ts";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
+
+initSentry("analyze-anamnese");
 
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = "claude-sonnet-4-6";
@@ -71,6 +75,11 @@ Deno.serve(async (req) => {
     });
     const { data: userRes } = await supabase.auth.getUser();
     if (!userRes?.user) return json(corsHeaders, { error: "Sessao invalida" }, 401);
+
+    // Rate limit de curto prazo (defesa contra cliques repetidos/loop de retry,
+    // complementar a cota mensal check_ai_quota abaixo).
+    const rl = await checkRateLimit(supabase, `analyze-anamnese:${userRes.user.id}`, 10, 60);
+    if (!rl) return rateLimitResponse(corsHeaders);
 
     // Checa cota mensal de IA do plano ANTES de gastar com a Anthropic.
     const { data: quota } = await supabase.rpc("check_ai_quota", { p_therapist_id: userRes.user.id });
@@ -156,6 +165,7 @@ Objetivos: ${d.obj ?? "-"}`;
 
     return json(corsHeaders, { ok: true, evaluation: parsed });
   } catch (e) {
+    captureError(e, { function: "analyze-anamnese" });
     return json(corsHeaders, { error: String((e as Error).message ?? e) }, 500);
   }
 });

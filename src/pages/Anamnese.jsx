@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { analyzeAnamnesis } from '../lib/ai'
 import { useToast } from '../components/Toast'
+import { createPatient } from '../lib/patients'
 
 export const ANM_SECTIONS = [
   { id:'consent', title:'Termo e Consentimento', desc:'Leia com atencao. Em caso de risco imediato: SAMU 192 ou CVV 188.', fields:[
@@ -58,30 +60,49 @@ export const ANM_SECTIONS = [
 ]
 export const ANM_TABS = ['Consent.','Identificacao','Queixa','Historia','Dificuldades','Sintomas','Saude','Familia','Encerramento']
 
+// Mapeia risco da anamnese (autorrelato + avaliacao de IA, se houver) para o
+// nivel de risco usado no cadastro do paciente.
+function inferPatientRisk(anamnese) {
+  if (anamnese.risk_flagged) return 'critico'
+  const aiRisk = anamnese.ai_evaluation?.nivel_risco
+  if (['baixo','moderado','alto','critico'].includes(aiRisk)) return aiRisk
+  return 'baixo'
+}
+
 export default function Anamnese() {
-  const { session } = useAuth()
+  const { session, ownerId, hasClinicalAccess } = useAuth()
   const { toast, promptCopy } = useToast()
   const [list, setList] = useState([])
+  const [patients, setPatients] = useState([])
   const [selected, setSelected] = useState(null)
   const [tab, setTab] = useState(0)
   const [ai, setAi] = useState(null)
   const [aiLoad, setAiLoad] = useState(false)
   const [aiErr, setAiErr] = useState(null)
+  const [showLinkForm, setShowLinkForm] = useState(false)
+  const [linkPatientId, setLinkPatientId] = useState('')
+  const [creatingPatient, setCreatingPatient] = useState(false)
 
   const load = () => supabase.from('anamneses')
-    .select('*, patients:patient_id (full_name, initials, avatar_bg, avatar_fg)')
-    .eq('therapist_id', session.user.id).order('created_at', {ascending:false})
+    .select('*, patients:patient_id (id, full_name, initials, avatar_bg, avatar_fg)')
+    .eq('therapist_id', ownerId).order('created_at', {ascending:false})
     .then(({data}) => setList(data ?? []))
 
-  useEffect(() => { if (session?.user) load() }, [session])
+  const loadPatients = () => supabase.from('patients')
+    .select('id, full_name').eq('therapist_id', ownerId).order('full_name')
+    .then(({data}) => setPatients(data ?? []))
+
+  useEffect(() => { if (session?.user && ownerId) { load(); loadPatients() } }, [session, ownerId])
 
   const createLink = async () => {
     const { data, error } = await supabase.from('anamneses')
-      .insert({ therapist_id: session.user.id, status: 'sent' })
+      .insert({ therapist_id: ownerId, status: 'sent', patient_id: linkPatientId || null })
       .select().single()
     if (error) { toast.error(error.message); return }
     const url = `${window.location.origin}/a/${data.public_token}`
     await promptCopy('Link seguro de anamnese (expira em 7 dias) — envie ao paciente por WhatsApp:', url)
+    setShowLinkForm(false)
+    setLinkPatientId('')
     load()
   }
 
@@ -97,6 +118,59 @@ export default function Anamnese() {
 
   useEffect(() => { setAi(selected?.ai_evaluation ?? null); setAiErr(null) }, [selected?.id])
 
+  // Cadastra um novo paciente usando os dados ja coletados na anamnese
+  // (nome, telefone, cidade, profissao, igreja e objetivos) e vincula esta
+  // anamnese ao cadastro criado — evita que a terapeuta precise redigitar
+  // tudo manualmente na tela de Pacientes.
+  const registerPatientFromAnamnese = async () => {
+    if (!selected) return
+    const d = selected.answers || {}
+    const nome = (d.nome || '').trim()
+    if (!nome) {
+      toast.error('Esta anamnese nao tem o nome preenchido — cadastre manualmente em Pacientes.')
+      return
+    }
+    setCreatingPatient(true)
+    try {
+      const goalsFromObjetivos = (d.obj || '').split('\n').map(s => s.trim()).filter(Boolean)
+      const goalsFromAreas = Array.isArray(d.qa) ? d.qa : []
+      const goals = [...new Set([...goalsFromAreas, ...goalsFromObjetivos])]
+
+      const newPatient = await createPatient(ownerId, {
+        full_name: nome,
+        phone: d.tel || null,
+        profession: d.profissao || null,
+        city: d.cidade || null,
+        church: d.ig || null,
+        risk: inferPatientRisk(selected),
+        goals,
+      })
+
+      const { error: linkErr } = await supabase.from('anamneses')
+        .update({ patient_id: newPatient.id }).eq('id', selected.id)
+      if (linkErr) {
+        toast.error('Paciente cadastrado, mas houve falha ao vincular esta anamnese: ' + linkErr.message)
+      } else {
+        toast.success(`${nome} cadastrado(a) como paciente a partir da anamnese.`)
+      }
+      setSelected({ ...selected, patient_id: newPatient.id, patients: newPatient })
+      load()
+    } catch (e) {
+      toast.error(e.message)
+    }
+    setCreatingPatient(false)
+  }
+
+  if (!hasClinicalAccess) {
+    return (
+      <div style={{padding:14}}>
+        <div className="card"><div className="cbdy" style={{padding:'22px 16px',textAlign:'center',fontSize:12.5,color:'var(--txt2)'}}>
+          Seu papel na equipe nao tem acesso a anamneses e avaliacoes clinicas.
+        </div></div>
+      </div>
+    )
+  }
+
   if (!selected) {
     return (
       <div style={{padding:14}}>
@@ -105,8 +179,34 @@ export default function Anamnese() {
             <h2 style={{fontSize:15,fontWeight:600}}>📋 Anamneses</h2>
             <p style={{fontSize:11,color:'var(--txt2)'}}>Gere um link seguro por WhatsApp e revise as respostas com apoio da IA.</p>
           </div>
-          <button className="btn btn-p btn-sm" onClick={createLink}>+ Gerar link de anamnese</button>
+          <button className="btn btn-p btn-sm" onClick={()=>setShowLinkForm(!showLinkForm)}>
+            {showLinkForm ? 'Cancelar' : '+ Gerar link de anamnese'}
+          </button>
         </div>
+
+        {showLinkForm && (
+          <div className="card" style={{marginBottom:12}}>
+            <div className="chdr">Novo link de anamnese</div>
+            <div className="cbdy">
+              <p style={{fontSize:11.5,color:'var(--txt2)',marginBottom:10}}>
+                Se este formulario e para alguem que ja e seu paciente, vincule abaixo (o resultado ja aparece
+                direto no prontuario dela). Se e alguem novo, deixe em branco — depois de responder, voce podera
+                cadastrar como paciente com um clique, usando os dados que a pessoa ja preencheu.
+              </p>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                <div className="field" style={{flex:1,minWidth:200,margin:0}}>
+                  <label>Vincular a um paciente ja cadastrado (opcional)</label>
+                  <select value={linkPatientId} onChange={e=>setLinkPatientId(e.target.value)}>
+                    <option value="">Pessoa nova (cadastrar depois)</option>
+                    {patients.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+                  </select>
+                </div>
+                <button className="btn btn-p btn-sm" style={{alignSelf:'flex-end'}} onClick={createLink}>Gerar link</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="card">
           <div className="cbdy" style={{padding:'4px 13px'}}>
             {list.length ? list.map((a) => {
@@ -116,7 +216,7 @@ export default function Anamnese() {
                 <div key={a.id} className="prow" onClick={()=>setSelected(a)}>
                   <div className="pavt" style={{background:p?.avatar_bg||'#EEEDFE', color:p?.avatar_fg||'#3C3489'}}>{p?.initials || '?'}</div>
                   <div className="pinf">
-                    <div className="pnm">{p?.full_name || 'Sem paciente vinculado'}</div>
+                    <div className="pnm">{p?.full_name || (a.answers?.nome || 'Sem paciente vinculado')}</div>
                     <div className="psub">{st} · {new Date(a.created_at).toLocaleDateString('pt-BR')}</div>
                   </div>
                   {a.risk_flagged ? <span className="rpill ra">⚠ RISCO</span> : null}
@@ -132,6 +232,8 @@ export default function Anamnese() {
 
   const d = selected.answers || {}
   const anmGet = (k) => d[k] ?? ''
+  const linkedPatient = Array.isArray(selected.patients) ? selected.patients[0] : selected.patients
+  const canRegister = selected.status !== 'sent' && selected.status !== 'pending' && !!anmGet('nome')
 
   return (
     <div>
@@ -140,6 +242,25 @@ export default function Anamnese() {
         <span style={{fontSize:12,color:'var(--txt2)'}}>{anmGet('nome') || 'Sem nome'} · {selected.status}</span>
         {selected.risk_flagged ? <span className="rpill ra">⚠ RISCO IMEDIATO</span> : null}
       </div>
+
+      {linkedPatient ? (
+        <div className="card" style={{margin:'12px 12px 0'}}>
+          <div className="cbdy" style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 13px'}}>
+            <span style={{fontSize:12}}>✅ Vinculada ao paciente <strong>{linkedPatient.full_name}</strong></span>
+            <Link className="btn btn-sm btn-p" to={`/patients/${linkedPatient.id}`}>Ver prontuario ›</Link>
+          </div>
+        </div>
+      ) : canRegister ? (
+        <div className="card" style={{margin:'12px 12px 0'}}>
+          <div className="cbdy" style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 13px',flexWrap:'wrap',gap:8}}>
+            <span style={{fontSize:12,color:'var(--txt2)'}}>Esta anamnese ainda nao esta vinculada a nenhum paciente.</span>
+            <button className="btn btn-sm btn-p" onClick={registerPatientFromAnamnese} disabled={creatingPatient}>
+              {creatingPatient ? 'Cadastrando…' : '+ Cadastrar como paciente'}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="t-split">
         <div className="t-pnl">
           <div className="t-pnl-hdr"><div style={{width:8,height:8,borderRadius:'50%',background:'var(--p)'}}></div>Anamnese do Paciente</div>

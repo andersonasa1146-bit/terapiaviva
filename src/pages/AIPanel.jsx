@@ -4,13 +4,13 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function AIPanel() {
-  const { session } = useAuth()
+  const { session, ownerId } = useAuth()
   const [list, setList] = useState([])
 
   useEffect(() => {
-    if (!session?.user) return
-    supabase.from('patients').select('*, sessions:sessions(count)').eq('therapist_id', session.user.id).eq('status','ativo').then(({data}) => setList(data ?? []))
-  }, [session])
+    if (!session?.user || !ownerId) return
+    supabase.from('patients').select('*, sessions:sessions(count)').eq('therapist_id', ownerId).eq('status','ativo').then(({data}) => setList(data ?? []))
+  }, [session, ownerId])
 
   return (
     <div style={{padding:14}}>

@@ -6,16 +6,26 @@ import { analyzeSession } from '../lib/ai'
 import { today as todayStr } from '../lib/format'
 import { useToast } from '../components/Toast'
 import { SITE } from '../config/site'
+import { logPatientAccess } from '../lib/audit'
+import ScalesPanel from '../components/ScalesPanel'
+import FilesPanel from '../components/FilesPanel'
+import AudioPanel from '../components/AudioPanel'
+import BillingPanel from '../components/BillingPanel'
+import SignaturePanel from '../components/SignaturePanel'
+
+const BLANK_FORM = { session_date: todayStr(), mode:'presencial', arrival:'', content:'', mood:5, spirit:5, openness:5, goals_done:[], next_goals:'', private_notes:'' }
 
 export default function PatientFile() {
   const { id } = useParams()
   const nav = useNavigate()
-  const { session } = useAuth()
-  const { toast } = useToast()
+  const { session, ownerId, hasFinancialAccess } = useAuth()
+  const { toast, confirm } = useToast()
   const [patient, setPatient] = useState(null)
   const [sessions, setSessions] = useState([])
   const [tab, setTab] = useState('sess')
-  const [form, setForm] = useState({ session_date: todayStr(), mode:'presencial', arrival:'', content:'', mood:5, spirit:5, openness:5, goals_done:[], next_goals:'', private_notes:'' })
+  const [form, setForm] = useState(BLANK_FORM)
+  const [editingId, setEditingId] = useState(null)
+  const [audioOpenId, setAudioOpenId] = useState(null)
   const [ai, setAi] = useState(null)
   const [aiLoad, setAiLoad] = useState(false)
   const [aiErr, setAiErr] = useState(null)
@@ -30,18 +40,75 @@ export default function PatientFile() {
   }
   useEffect(() => { if (session?.user) load() }, [id, session])
 
+  // Task #31: registra no log de auditoria a abertura do prontuario — uma
+  // vez por visita (nao a cada re-fetch de save/edicao), para nao poluir o
+  // log com ruido.
+  useEffect(() => { if (session?.user && id) logPatientAccess(id, 'view_patient') }, [id, session])
+  useEffect(() => { if (session?.user && id && tab === 'relatorio') logPatientAccess(id, 'view_report') }, [tab, id, session])
+
   const toggleGoal = (g) => {
     const list = form.goals_done.includes(g) ? form.goals_done.filter(x=>x!==g) : [...form.goals_done, g]
     setForm({ ...form, goals_done: list })
   }
 
+  const startEdit = (s) => {
+    setEditingId(s.id)
+    setForm({
+      session_date: s.session_date, mode: s.mode, arrival: s.arrival || '', content: s.content || '',
+      mood: s.mood, spirit: s.spirit, openness: s.openness, goals_done: s.goals_done || [],
+      next_goals: s.next_goals || '', private_notes: s.private_notes || '',
+    })
+    setAi(null); setAiErr(null)
+    setTab('sess')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setForm(BLANK_FORM)
+    setAi(null); setAiErr(null)
+  }
+
+  const removeSession = async (s) => {
+    const ok = await confirm(`Excluir permanentemente a Sessao #${s.session_number} de ${new Date(s.session_date).toLocaleDateString('pt-BR')}? Esta acao nao pode ser desfeita.`, { danger: true, confirmLabel: 'Excluir' })
+    if (!ok) return
+    const { error } = await supabase.from('sessions').delete().eq('id', s.id)
+    if (error) { toast.error(error.message); return }
+    toast.success('Sessao excluida.')
+    if (editingId === s.id) cancelEdit()
+    load()
+  }
+
   const save = async () => {
     if (!form.content || form.content.trim().length < 10) { toast.error('Preencha as anotacoes antes de salvar.'); return }
     setSaving(true)
+
+    if (editingId) {
+      const { data, error } = await supabase.from('sessions').update({
+        session_date: form.session_date,
+        mode: form.mode,
+        arrival: form.arrival,
+        content: form.content,
+        mood: Number(form.mood),
+        spirit: Number(form.spirit),
+        openness: Number(form.openness),
+        goals_done: form.goals_done,
+        next_goals: form.next_goals,
+        private_notes: form.private_notes,
+        edited_at: new Date().toISOString(),
+      }).eq('id', editingId).select().single()
+      setSaving(false)
+      if (error) { toast.error(error.message); return }
+      toast.success('Sessao atualizada.')
+      cancelEdit()
+      load()
+      return data
+    }
+
     const num = sessions.length + 1
     const { data, error } = await supabase.from('sessions').insert({
       patient_id: id,
-      therapist_id: session.user.id,
+      therapist_id: ownerId,
       session_number: num,
       session_date: form.session_date,
       mode: form.mode,
@@ -57,7 +124,7 @@ export default function PatientFile() {
     setSaving(false)
     if (error) { toast.error(error.message); return }
     toast.success('Sessao salva.')
-    setForm({ session_date: todayStr(), mode:'presencial', arrival:'', content:'', mood:5, spirit:5, openness:5, goals_done:[], next_goals:'', private_notes:'' })
+    setForm(BLANK_FORM)
     setAi(null); setAiErr(null)
     load()
     return data
@@ -76,6 +143,8 @@ export default function PatientFile() {
   }
 
   if (!patient) return <div style={{padding:24}}>Carregando…</div>
+
+  const editingSession = editingId ? sessions.find(s => s.id === editingId) : null
 
   return (
     <div className="pf-wrap">
@@ -97,7 +166,7 @@ export default function PatientFile() {
       </div>
 
       <div className="tabs">
-        {[['sess','📝 Sessoes'],['ficha','🗂 Ficha'],['relatorio','📄 Relatorio']].map(([t,l]) => (
+        {[['sess','📝 Sessoes'],['escalas','📊 Escalas'],['arquivos','📎 Arquivos'],...(hasFinancialAccess ? [['cobranca','💵 Cobranca']] : []),['ficha','🗂 Ficha'],['relatorio','📄 Relatorio']].map(([t,l]) => (
           <button key={t} className={`tab ${tab===t?'on':''}`} onClick={()=>setTab(t)}>{l}</button>
         ))}
       </div>
@@ -105,9 +174,12 @@ export default function PatientFile() {
       {tab === 'sess' && (
         <>
           <div className="card" style={{marginBottom:12}}>
-            <div className="chdr" style={{background:'var(--pl)',color:'var(--pd)'}}>
-              <span>📝 Registro de Sessao — <strong>Sessao #{sessions.length+1}</strong></span>
-              <button className="btn btn-sm btn-p" onClick={save} disabled={saving}>{saving?'Salvando…':'Salvar sessao'}</button>
+            <div className="chdr" style={{background: editingId ? '#FDF6E3' : 'var(--pl)', color: editingId ? '#8a5a06' : 'var(--pd)'}}>
+              <span>{editingId ? `✏️ Editando Sessao #${editingSession?.session_number ?? ''}` : <>📝 Registro de Sessao — <strong>Sessao #{sessions.length+1}</strong></>}</span>
+              <div style={{display:'flex', gap:7}}>
+                {editingId && <button className="btn btn-sm" onClick={cancelEdit}>Cancelar edicao</button>}
+                <button className="btn btn-sm btn-p" onClick={save} disabled={saving}>{saving?'Salvando…':(editingId?'Salvar alteracoes':'Salvar sessao')}</button>
+              </div>
             </div>
             <div className="dual">
               <div className="dp-l">
@@ -167,15 +239,26 @@ export default function PatientFile() {
                   <div className="hist-hdr">
                     <span className="hist-num">Sessao #{s.session_number}</span>
                     <span className="hist-date">{new Date(s.session_date).toLocaleDateString('pt-BR')}</span>
+                    {s.edited_at && <span style={{fontSize:9.5,color:'var(--txt3)',fontStyle:'italic'}}>editada</span>}
                     <span style={{marginLeft:'auto',fontSize:10,color:'var(--txt2)'}}>😊{s.mood}/10 · ✨{s.spirit}/10</span>
+                    <button className="btn btn-sm" style={{padding:'2px 8px',fontSize:10.5}} onClick={()=>setAudioOpenId(audioOpenId===s.id?null:s.id)}>🎙️ Audio{s.audio_path?' ✓':''}</button>
+                    <button className="btn btn-sm" style={{padding:'2px 8px',fontSize:10.5}} onClick={()=>startEdit(s)}>✏️ Editar</button>
+                    <button className="btn btn-sm" style={{padding:'2px 8px',fontSize:10.5,color:'var(--red)'}} onClick={()=>removeSession(s)}>🗑</button>
                   </div>
                   <div className="hist-sum">{s.content}</div>
+                  {audioOpenId === s.id && <AudioPanel s={s} onUpdated={load} />}
                 </div>
               )) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhuma sessao registrada ainda.</div>}
             </div>
           </div>
         </>
       )}
+
+      {tab === 'escalas' && <ScalesPanel patientId={id} />}
+
+      {tab === 'arquivos' && <FilesPanel patientId={id} />}
+
+      {tab === 'cobranca' && hasFinancialAccess && <BillingPanel patientId={id} />}
 
       {tab === 'ficha' && (
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
@@ -230,6 +313,7 @@ export default function PatientFile() {
               )) : <p style={{fontSize:12,color:'var(--txt2)'}}>Nenhuma sessao registrada.</p>}
             </div>
           </div>
+          <SignaturePanel patientId={id} />
         </div>
       )}
     </div>
