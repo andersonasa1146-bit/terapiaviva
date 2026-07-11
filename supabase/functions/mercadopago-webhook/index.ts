@@ -14,6 +14,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { initSentry, captureError } from "../_shared/sentry.ts";
 import { checkRateLimit, clientIp } from "../_shared/rateLimit.ts";
+import { verifyMpSignature } from "../_shared/mercadopago.ts";
 
 initSentry("mercadopago-webhook");
 
@@ -41,6 +42,13 @@ Deno.serve(async (req) => {
     const preapprovalId = body?.data?.id ?? url.searchParams.get("id");
     const topic = body?.type ?? url.searchParams.get("topic");
 
+    // Valida a assinatura HMAC do Mercado Pago (header x-signature) antes de
+    // processar. Sem MERCADOPAGO_WEBHOOK_SECRET configurada, apenas avisa.
+    const sig = await verifyMpSignature(req, String(preapprovalId ?? url.searchParams.get("data.id") ?? ""));
+    if (!sig.ok) {
+      return new Response(JSON.stringify({ error: `Assinatura do webhook rejeitada: ${sig.reason}` }), { status: 401 });
+    }
+
     if (!preapprovalId || (topic && topic !== "preapproval" && topic !== "subscription_preapproval")) {
       // Notificacao de outro tipo (ex.: pagamento avulso) — ignora silenciosamente.
       return new Response(JSON.stringify({ ok: true, ignored: true }), { status: 200 });
@@ -61,16 +69,4 @@ Deno.serve(async (req) => {
     const patch: Record<string, unknown> = { mp_subscription_status: status };
     if (status === "authorized") {
       patch.plan = "profissional";
-      patch.plan_ai_limit = Number(Deno.env.get("MP_PLAN_AI_LIMIT") ?? "300");
-    } else if (status === "cancelled" || status === "paused") {
-      patch.plan = "cancelado";
-    }
-
-    await supabase.from("therapists").update(patch).eq("id", therapistId);
-
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
-  } catch (e) {
-    captureError(e, { function: "mercadopago-webhook" });
-    return new Response(JSON.stringify({ error: String((e as Error).message ?? e) }), { status: 500 });
-  }
-});
+      patch.plan_ai_limit = Number(Deno.env.get

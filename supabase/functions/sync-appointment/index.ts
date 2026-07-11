@@ -7,26 +7,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { initSentry, captureError } from "../_shared/sentry.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
+import { corsHeadersFor } from "../_shared/cors.ts";
 
 initSentry("sync-appointment");
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CAL_BASE = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
 
-const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "*")
-  .split(",").map((o) => o.trim()).filter(Boolean);
-
-function corsHeadersFor(req: Request) {
-  const origin = req.headers.get("Origin") ?? "";
-  const allowAll = ALLOWED_ORIGINS.includes("*");
-  const allowOrigin = allowAll ? "*" : (ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0] ?? "");
-  return {
-    "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Vary": "Origin",
-  };
-}
 
 async function refreshAccessToken(refreshToken: string, clientId: string, clientSecret: string) {
   const res = await fetch(TOKEN_URL, {

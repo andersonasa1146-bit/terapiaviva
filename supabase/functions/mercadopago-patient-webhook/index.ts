@@ -13,6 +13,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { initSentry, captureError } from "../_shared/sentry.ts";
 import { checkRateLimit, clientIp } from "../_shared/rateLimit.ts";
+import { verifyMpSignature } from "../_shared/mercadopago.ts";
 
 initSentry("mercadopago-patient-webhook");
 
@@ -33,6 +34,11 @@ Deno.serve(async (req) => {
     const paymentId = url.searchParams.get("data.id") || body?.data?.id || body?.id;
     const chargeId = url.searchParams.get("charge_id");
     if (!paymentId || !chargeId) return json({ ok: true, ignored: true });
+
+    // Valida a assinatura HMAC do Mercado Pago (header x-signature) antes de
+    // processar. Sem MERCADOPAGO_WEBHOOK_SECRET configurada, apenas avisa.
+    const sig = await verifyMpSignature(req, String(paymentId));
+    if (!sig.ok) return json({ error: `Assinatura do webhook rejeitada: ${sig.reason}` }, 401);
 
     const { data: charge } = await admin.from("patient_charges").select("*").eq("id", chargeId).maybeSingle();
     if (!charge) return json({ ok: true, unresolved: true });
@@ -65,16 +71,4 @@ Deno.serve(async (req) => {
         status: "pago",
       });
     } else if (["cancelled", "rejected"].includes(payment.status)) {
-      await admin.from("patient_charges").update({ status: "cancelled" }).eq("id", charge.id);
-    }
-
-    return json({ ok: true });
-  } catch (e) {
-    captureError(e, { function: "mercadopago-patient-webhook" });
-    return json({ error: String((e as Error).message ?? e) }, 500);
-  }
-});
-
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
-}
+      await admin.from("patient_charges").update({ status: "cancelled" })
