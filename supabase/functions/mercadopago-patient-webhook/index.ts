@@ -71,4 +71,16 @@ Deno.serve(async (req) => {
         status: "pago",
       });
     } else if (["cancelled", "rejected"].includes(payment.status)) {
-      await admin.from("patient_charges").update({ status: "cancelled" })
+      await admin.from("patient_charges").update({ status: "cancelled" }).eq("id", charge.id);
+    }
+
+    return json({ ok: true });
+  } catch (e) {
+    captureError(e, { function: "mercadopago-patient-webhook" });
+    return json({ error: String((e as Error).message ?? e) }, 500);
+  }
+});
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+}

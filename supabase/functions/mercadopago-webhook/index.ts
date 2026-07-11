@@ -69,4 +69,16 @@ Deno.serve(async (req) => {
     const patch: Record<string, unknown> = { mp_subscription_status: status };
     if (status === "authorized") {
       patch.plan = "profissional";
-      patch.plan_ai_limit = Number(Deno.env.get
+      patch.plan_ai_limit = Number(Deno.env.get("MP_PLAN_AI_LIMIT") ?? "300");
+    } else if (status === "cancelled" || status === "paused") {
+      patch.plan = "cancelado";
+    }
+
+    await supabase.from("therapists").update(patch).eq("id", therapistId);
+
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  } catch (e) {
+    captureError(e, { function: "mercadopago-webhook" });
+    return new Response(JSON.stringify({ error: String((e as Error).message ?? e) }), { status: 500 });
+  }
+});
