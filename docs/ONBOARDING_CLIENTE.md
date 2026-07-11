@@ -19,7 +19,8 @@ supabase secrets set MERCADOPAGO_WEBHOOK_SECRET=...   # painel MP > Webhooks > a
 supabase secrets set CRON_SECRET=...                  # lembretes agendados
 supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:...
 supabase secrets set AUTENTIQUE_TOKEN=... AUTENTIQUE_WEBHOOK_SECRET=...   # assinatura digital (opcional)
-supabase secrets set DAILY_API_KEY=...                # teleconsulta (opcional)
+# Teleconsulta: Jitsi (gratuito) e o padrao, nada a configurar. Para usar Daily.co:
+# supabase secrets set VIDEO_PROVIDER=daily DAILY_API_KEY=...  (exige cartao na conta Daily)
 supabase secrets set SENTRY_DSN=...                   # monitoramento (opcional)
 # White-label da IA (opcional — padrão é tradição bíblica batista):
 supabase secrets set THERAPY_TRADITION_LABEL="..." COUNSELING_TRAINING="..."
