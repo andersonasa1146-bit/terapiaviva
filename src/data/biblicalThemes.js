@@ -1,0 +1,186 @@
+// Temas frequentes no consultorio, cada um com versiculos de apoio.
+// Textos em portugues (paráfrase curta no estilo Almeida, sem acentos para
+// manter o padrao do restante do codigo).
+
+export const BIBLICAL_THEMES = [
+  { tema: 'Ansiedade e paz', versos: [
+    { r: 'Filipenses 4:6-7', t: 'Nao andeis ansiosos por coisa alguma; antes, em tudo, sejam os vossos pedidos conhecidos diante de Deus. E a paz de Deus guardara os vossos coracoes.' },
+    { r: 'Mateus 6:34', t: 'Nao vos inquieteis com o dia de amanha, pois o amanha trara os seus cuidados; basta a cada dia o seu mal.' },
+    { r: '1 Pedro 5:7', t: 'Lancando sobre ele toda a vossa ansiedade, porque ele tem cuidado de vos.' },
+    { r: 'Joao 14:27', t: 'Deixo-vos a paz, a minha paz vos dou; nao vo-la dou como o mundo a da. Nao se turbe o vosso coracao.' },
+  ]},
+  { tema: 'Casamento e familia', versos: [
+    { r: 'Efesios 4:2-3', t: 'Com toda humildade e mansidao, com longanimidade, suportando-vos uns aos outros em amor, procurando guardar a unidade.' },
+    { r: '1 Corintios 13:4-7', t: 'O amor e paciente, e benigno; nao se irrita, nao suspeita mal; tudo sofre, tudo cre, tudo espera, tudo suporta.' },
+    { r: 'Eclesiastes 4:9-10', t: 'Melhor e serem dois do que um. Se um cair, o outro levanta o seu companheiro.' },
+    { r: 'Josue 24:15', t: 'Eu e a minha casa serviremos ao Senhor.' },
+  ]},
+  { tema: 'Perdao e restauracao', versos: [
+    { r: 'Efesios 4:32', t: 'Sede uns para com os outros benignos, compassivos, perdoando-vos uns aos outros, como tambem Deus vos perdoou em Cristo.' },
+    { r: 'Colossenses 3:13', t: 'Suportai-vos uns aos outros e perdoai-vos mutuamente; assim como o Senhor vos perdoou, assim fazei vos tambem.' },
+    { r: '1 Joao 1:9', t: 'Se confessarmos os nossos pecados, ele e fiel e justo para nos perdoar e nos purificar de toda injustica.' },
+    { r: 'Mateus 6:14', t: 'Se perdoardes aos homens as suas ofensas, tambem vosso Pai celestial vos perdoara.' },
+  ]},
+  { tema: 'Identidade em Cristo', versos: [
+    { r: '2 Corintios 5:17', t: 'Se alguem esta em Cristo, nova criatura e: as coisas velhas ja passaram; eis que tudo se fez novo.' },
+    { r: 'Salmo 139:14', t: 'Eu te louvarei, porque de um modo assombroso e tao maravilhoso fui feito; maravilhosas sao as tuas obras.' },
+    { r: 'Efesios 2:10', t: 'Somos feitura sua, criados em Cristo Jesus para as boas obras, as quais Deus preparou de antemao.' },
+    { r: 'Joao 1:12', t: 'A todos quantos o receberam, deu-lhes o poder de serem feitos filhos de Deus.' },
+  ]},
+  { tema: 'Luto e perda', versos: [
+    { r: 'Salmo 34:18', t: 'Perto esta o Senhor dos que tem o coracao quebrantado, e salva os contritos de espirito.' },
+    { r: 'Mateus 5:4', t: 'Bem-aventurados os que choram, porque eles serao consolados.' },
+    { r: 'Apocalipse 21:4', t: 'Deus lhes enxugara dos olhos toda lagrima; e nao havera mais morte, nem pranto, nem clamor, nem dor.' },
+    { r: 'Salmo 23:4', t: 'Ainda que eu ande pelo vale da sombra da morte, nao temerei mal algum, porque tu estas comigo.' },
+  ]},
+  { tema: 'Proposito e vocacao', versos: [
+    { r: 'Jeremias 29:11', t: 'Porque sou eu que conheco os planos que tenho para voces, diz o Senhor: planos de paz e nao de mal, para vos dar um futuro e uma esperanca.' },
+    { r: 'Proverbios 16:3', t: 'Confia ao Senhor as tuas obras, e os teus planos serao estabelecidos.' },
+    { r: 'Romanos 8:28', t: 'Sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus, dos que sao chamados segundo o seu proposito.' },
+    { r: 'Colossenses 3:23', t: 'Tudo quanto fizerdes, fazei-o de todo o coracao, como ao Senhor e nao aos homens.' },
+  ]},
+  { tema: 'Depressao e esperanca', versos: [
+    { r: 'Salmo 42:11', t: 'Por que estas abatida, o minha alma? Espera em Deus, pois ainda o louvarei; ele e a salvacao da minha face e o meu Deus.' },
+    { r: 'Isaias 41:10', t: 'Nao temas, porque eu sou contigo; nao te assombres, porque eu sou o teu Deus; eu te fortaleco, e te ajudo.' },
+    { r: 'Lamentacoes 3:22-23', t: 'As misericordias do Senhor sao a causa de nao sermos consumidos; novas sao a cada manha; grande e a tua fidelidade.' },
+    { r: 'Romanos 15:13', t: 'O Deus de esperanca vos encha de todo gozo e paz na fe, para que abundeis em esperanca.' },
+  ]},
+  { tema: 'Medo e coragem', versos: [
+    { r: 'Josue 1:9', t: 'Se forte e corajoso; nao temas, nem te espantes, porque o Senhor teu Deus e contigo por onde quer que andares.' },
+    { r: '2 Timoteo 1:7', t: 'Deus nao nos deu espirito de covardia, mas de poder, de amor e de moderacao.' },
+    { r: 'Salmo 27:1', t: 'O Senhor e a minha luz e a minha salvacao; a quem temerei?' },
+    { r: 'Isaias 43:1-2', t: 'Nao temas, porque eu te remi; chamei-te pelo teu nome, tu es meu. Quando passares pelas aguas, estarei contigo.' },
+  ]},
+  { tema: 'Culpa e graca', versos: [
+    { r: 'Romanos 8:1', t: 'Nenhuma condenacao ha para os que estao em Cristo Jesus.' },
+    { r: 'Salmo 103:12', t: 'Quanto dista o oriente do ocidente, assim afasta de nos as nossas transgressoes.' },
+    { r: 'Isaias 1:18', t: 'Ainda que os vossos pecados sejam como a escarlata, eles se tornarao brancos como a neve.' },
+    { r: 'Efesios 2:8-9', t: 'Pela graca sois salvos, por meio da fe; e isto nao vem de vos, e dom de Deus.' },
+  ]},
+  { tema: 'Solidao e presenca de Deus', versos: [
+    { r: 'Deuteronomio 31:6', t: 'O Senhor teu Deus e o que vai contigo; nao te deixara nem te desamparara.' },
+    { r: 'Salmo 68:6', t: 'Deus faz que o solitario viva em familia.' },
+    { r: 'Mateus 28:20', t: 'Eis que eu estou convosco todos os dias, ate a consumacao dos seculos.' },
+    { r: 'Salmo 139:7-10', t: 'Para onde me irei do teu Espirito? Ainda ali a tua mao me guiara e a tua destra me sustera.' },
+  ]},
+  { tema: 'Raiva e dominio proprio', versos: [
+    { r: 'Proverbios 15:1', t: 'A resposta branda desvia o furor, mas a palavra dura suscita a ira.' },
+    { r: 'Efesios 4:26-27', t: 'Irai-vos e nao pequeis; nao se ponha o sol sobre a vossa ira, nem deis lugar ao diabo.' },
+    { r: 'Tiago 1:19-20', t: 'Todo homem seja pronto para ouvir, tardio para falar, tardio para se irar.' },
+    { r: 'Proverbios 16:32', t: 'Melhor e o longanimo do que o valente; e o que governa o seu espirito do que o que toma uma cidade.' },
+  ]},
+  { tema: 'Traumas e cura interior', versos: [
+    { r: 'Salmo 147:3', t: 'Ele sara os quebrantados de coracao e cura-lhes as feridas.' },
+    { r: 'Isaias 61:1-3', t: 'Enviou-me a curar os quebrantados de coracao, a consolar todos os que choram, a dar-lhes coroa em vez de cinzas.' },
+    { r: 'Jeremias 30:17', t: 'Sarei-vos das vossas feridas, diz o Senhor.' },
+    { r: 'Joel 2:25', t: 'Restituir-vos-ei os anos que foram consumidos.' },
+  ]},
+  { tema: 'Autoestima e valor proprio', versos: [
+    { r: 'Mateus 10:29-31', t: 'Ate os cabelos da vossa cabeca estao todos contados. Nao temais; mais valeis vos do que muitos passarinhos.' },
+    { r: 'Isaias 43:4', t: 'Foste precioso aos meus olhos, digno de honra, e eu te amei.' },
+    { r: '1 Pedro 2:9', t: 'Vos sois a geracao eleita, o sacerdocio real, a nacao santa, o povo adquirido.' },
+    { r: 'Genesis 1:27', t: 'Criou Deus o homem a sua imagem; a imagem de Deus o criou.' },
+  ]},
+  { tema: 'Vicios e libertacao', versos: [
+    { r: 'Joao 8:36', t: 'Se o Filho vos libertar, verdadeiramente sereis livres.' },
+    { r: '1 Corintios 10:13', t: 'Deus e fiel e nao permitira que sejais tentados alem das vossas forcas; antes, com a tentacao dara o escape.' },
+    { r: 'Galatas 5:1', t: 'Para a liberdade foi que Cristo nos libertou; permanecei firmes e nao vos submetais de novo a jugo de escravidao.' },
+    { r: 'Romanos 12:2', t: 'Transformai-vos pela renovacao da vossa mente.' },
+  ]},
+  { tema: 'Financas e provisao', versos: [
+    { r: 'Filipenses 4:19', t: 'O meu Deus suprira todas as vossas necessidades segundo as suas riquezas na gloria em Cristo Jesus.' },
+    { r: 'Mateus 6:33', t: 'Buscai primeiro o reino de Deus e a sua justica, e todas estas coisas vos serao acrescentadas.' },
+    { r: 'Proverbios 3:9-10', t: 'Honra ao Senhor com os teus bens e com as primicias de toda a tua renda.' },
+    { r: 'Hebreus 13:5', t: 'Seja a vossa vida sem avareza, contentando-vos com o que tendes; porque ele disse: Nao te deixarei.' },
+  ]},
+  { tema: 'Trabalho e descanso', versos: [
+    { r: 'Mateus 11:28', t: 'Vinde a mim todos os que estais cansados e oprimidos, e eu vos aliviarei.' },
+    { r: 'Salmo 127:2', t: 'Inutil vos sera levantar de madrugada, comer o pao de dores, pois aos seus amados ele o da enquanto dormem.' },
+    { r: 'Exodo 20:9-10', t: 'Seis dias trabalharas, mas o setimo dia e o sabado do Senhor teu Deus.' },
+    { r: 'Marcos 6:31', t: 'Vinde vos, a parte, a um lugar deserto, e repousai um pouco.' },
+  ]},
+  { tema: 'Criacao de filhos', versos: [
+    { r: 'Proverbios 22:6', t: 'Ensina a crianca no caminho em que deve andar, e ate quando envelhecer nao se desviara dele.' },
+    { r: 'Efesios 6:4', t: 'Pais, nao provoqueis a ira a vossos filhos, mas criai-os na doutrina e admoestacao do Senhor.' },
+    { r: 'Deuteronomio 6:6-7', t: 'Estas palavras estarao no teu coracao, e as ensinaras a teus filhos, falando delas em casa e pelo caminho.' },
+    { r: 'Salmo 127:3', t: 'Os filhos sao heranca do Senhor, e o fruto do ventre o seu galardao.' },
+  ]},
+  { tema: 'Relacionamentos e amizades', versos: [
+    { r: 'Proverbios 17:17', t: 'Em todo tempo ama o amigo, e na angustia nasce o irmao.' },
+    { r: 'Joao 15:13', t: 'Ninguem tem maior amor do que este: de dar alguem a propria vida pelos seus amigos.' },
+    { r: 'Proverbios 27:17', t: 'Como o ferro com o ferro se afia, assim o homem afia o rosto do seu amigo.' },
+    { r: 'Romanos 12:10', t: 'Amai-vos cordialmente uns aos outros com amor fraternal, preferindo-vos em honra uns aos outros.' },
+  ]},
+  { tema: 'Doenca e cura', versos: [
+    { r: 'Salmo 103:2-3', t: 'Bendize, o minha alma, ao Senhor, que sara todas as tuas enfermidades.' },
+    { r: 'Tiago 5:14-15', t: 'Esta alguem entre vos doente? Chame os presbiteros, e a oracao da fe salvara o doente.' },
+    { r: 'Isaias 53:5', t: 'Pelas suas pisaduras fomos sarados.' },
+    { r: '3 Joao 1:2', t: 'Amado, desejo que te va bem em todas as coisas e que tenhas saude, assim como bem vai a tua alma.' },
+  ]},
+  { tema: 'Insonia e descanso', versos: [
+    { r: 'Salmo 4:8', t: 'Em paz me deitarei e dormirei, porque so tu, Senhor, me fazes habitar em seguranca.' },
+    { r: 'Proverbios 3:24', t: 'Quando te deitares, nao temeras; sim, tu te deitaras, e o teu sono sera suave.' },
+    { r: 'Salmo 121:3-4', t: 'Nao dormitara aquele que te guarda; eis que nao dormitara nem dormira o guarda de Israel.' },
+    { r: 'Mateus 8:24-26', t: 'Jesus dormia na barca durante a tempestade; depois repreendeu os ventos e fez-se grande bonanca.' },
+  ]},
+  { tema: 'Estresse e sobrecarga', versos: [
+    { r: 'Salmo 55:22', t: 'Lanca o teu cuidado sobre o Senhor, e ele te sustera; nunca permitira que o justo seja abalado.' },
+    { r: 'Isaias 40:29-31', t: 'Os que esperam no Senhor renovarao as suas forcas, subirao com asas como aguias.' },
+    { r: 'Mateus 11:29-30', t: 'O meu jugo e suave, e o meu fardo e leve.' },
+    { r: 'Exodo 18:17-18', t: 'Nao e bom o que fazes; certamente desfaleceras, porque isto e pesado demais para ti; nao o podes fazer sozinho.' },
+  ]},
+  { tema: 'Rejeicao e acolhimento', versos: [
+    { r: 'Salmo 27:10', t: 'Se meu pai e minha mae me desampararem, o Senhor me acolhera.' },
+    { r: 'Isaias 49:15-16', t: 'Pode uma mulher esquecer-se do filho que ainda mama? Mas eu nao me esquecerei de ti; nas palmas das minhas maos te gravei.' },
+    { r: 'Joao 6:37', t: 'O que vem a mim de maneira nenhuma o lancarei fora.' },
+    { r: 'Romanos 15:7', t: 'Acolhei-vos uns aos outros, como tambem Cristo nos acolheu para gloria de Deus.' },
+  ]},
+  { tema: 'Ciume e contentamento', versos: [
+    { r: 'Filipenses 4:11-12', t: 'Aprendi a contentar-me com o que tenho; sei estar abatido e sei tambem ter abundancia.' },
+    { r: 'Proverbios 14:30', t: 'O coracao com saude e a vida da carne, mas a inveja e a podridao dos ossos.' },
+    { r: '1 Timoteo 6:6', t: 'Grande fonte de lucro e a piedade com o contentamento.' },
+    { r: 'Galatas 6:4', t: 'Prove cada um a sua propria obra, e tera gloria so em si mesmo e nao noutro.' },
+  ]},
+  { tema: 'Divorcio e recomecos', versos: [
+    { r: 'Isaias 43:18-19', t: 'Nao vos lembreis das coisas passadas; eis que faco uma coisa nova, agora saira a luz.' },
+    { r: 'Salmo 147:3', t: 'Ele sara os quebrantados de coracao e cura-lhes as feridas.' },
+    { r: 'Filipenses 3:13-14', t: 'Esquecendo-me das coisas que atras ficam e avancando para as que estao adiante, prossigo para o alvo.' },
+    { r: 'Rute 1:16', t: 'Aonde quer que fores, irei eu; o teu povo e o meu povo, o teu Deus e o meu Deus.' },
+  ]},
+  { tema: 'Gratidao e alegria', versos: [
+    { r: '1 Tessalonicenses 5:16-18', t: 'Regozijai-vos sempre. Orai sem cessar. Em tudo dai gracas.' },
+    { r: 'Salmo 118:24', t: 'Este e o dia que fez o Senhor; regozijemo-nos e alegremo-nos nele.' },
+    { r: 'Neemias 8:10', t: 'A alegria do Senhor e a vossa forca.' },
+    { r: 'Salmo 100:4', t: 'Entrai pelas portas dele com gratidao, e em seus atrios com louvor.' },
+  ]},
+  { tema: 'Paciencia e espera', versos: [
+    { r: 'Salmo 27:14', t: 'Espera no Senhor, anima-te, e ele fortalecera o teu coracao; espera, pois, no Senhor.' },
+    { r: 'Eclesiastes 3:1', t: 'Tudo tem o seu tempo determinado, e ha tempo para todo proposito debaixo do ceu.' },
+    { r: 'Romanos 5:3-4', t: 'A tribulacao produz a perseveranca, e a perseveranca a experiencia, e a experiencia a esperanca.' },
+    { r: 'Habacuque 2:3', t: 'A visao e ainda para o tempo determinado; se tardar, espera-a, porque certamente vira.' },
+  ]},
+  { tema: 'Tentacao e fidelidade', versos: [
+    { r: '1 Corintios 10:13', t: 'Nao veio sobre vos tentacao senao humana; mas fiel e Deus, que dara juntamente com a tentacao o escape.' },
+    { r: 'Tiago 1:12', t: 'Bem-aventurado o homem que suporta a tentacao; recebera a coroa da vida.' },
+    { r: 'Salmo 119:11', t: 'Escondi a tua palavra no meu coracao, para nao pecar contra ti.' },
+    { r: 'Hebreus 4:15-16', t: 'Temos um sumo sacerdote que foi tentado em todas as coisas, mas sem pecado; cheguemos com confianca ao trono da graca.' },
+  ]},
+  { tema: 'Sabedoria e decisoes', versos: [
+    { r: 'Tiago 1:5', t: 'Se algum de vos tem falta de sabedoria, peca-a a Deus, que a todos da liberalmente, e ser-lhe-a dada.' },
+    { r: 'Proverbios 3:5-6', t: 'Confia no Senhor de todo o teu coracao e nao te estribes no teu proprio entendimento; ele endireitara as tuas veredas.' },
+    { r: 'Salmo 32:8', t: 'Instruir-te-ei e ensinar-te-ei o caminho que deves seguir; guiar-te-ei com os meus olhos.' },
+    { r: 'Proverbios 15:22', t: 'Sem conselho os planos se frustram, mas com muitos conselheiros se estabelecem.' },
+  ]},
+  { tema: 'Envelhecimento e legado', versos: [
+    { r: 'Salmo 92:14', t: 'Na velhice ainda darao frutos, serao cheios de seiva e de verdor.' },
+    { r: 'Isaias 46:4', t: 'Ate a vossa velhice eu serei o mesmo, e ate as cas eu vos carregarei.' },
+    { r: 'Salmo 71:18', t: 'Na velhice, o Deus, nao me desampares, ate que anuncie a tua forca a esta geracao.' },
+    { r: '2 Timoteo 4:7', t: 'Combati o bom combate, acabei a carreira, guardei a fe.' },
+  ]},
+  { tema: 'Morte e eternidade', versos: [
+    { r: 'Joao 11:25-26', t: 'Eu sou a ressurreicao e a vida; quem cre em mim, ainda que morra, vivera.' },
+    { r: '1 Tessalonicenses 4:13-14', t: 'Nao vos entristecais como os demais, que nao tem esperanca.' },
+    { r: '2 Corintios 5:1', t: 'Temos da parte de Deus um edificio, casa nao feita por maos, eterna, nos ceus.' },
+    { r: 'Salmo 116:15', t: 'Preciosa e a vista do Senhor a morte dos seus santos.' },
+  ]},
+]

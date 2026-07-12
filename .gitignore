@@ -9,3 +9,5 @@ dist
 supabase/.temp
 playwright-report
 test-results
+.vercel
+.env*
