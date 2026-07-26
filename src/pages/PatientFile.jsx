@@ -15,6 +15,15 @@ import SignaturePanel from '../components/SignaturePanel'
 
 const BLANK_FORM = { session_date: todayStr(), mode:'presencial', arrival:'', content:'', mood:5, spirit:5, openness:5, goals_done:[], next_goals:'', private_notes:'' }
 
+// Copia o relatorio da tela para o container de impressao. Fora do componente
+// para ser uma referencia estavel em addEventListener/removeEventListener.
+function fillPrintArea() {
+  const src = document.getElementById('rpt-content')
+  const area = document.getElementById('print-area')
+  if (!src || !area) return
+  area.innerHTML = `<div class="rpt-doc">${src.innerHTML}</div>`
+}
+
 export default function PatientFile() {
   const { id } = useParams()
   const nav = useNavigate()
@@ -45,6 +54,23 @@ export default function PatientFile() {
   // log com ruido.
   useEffect(() => { if (session?.user && id) logPatientAccess(id, 'view_patient') }, [id, session])
   useEffect(() => { if (session?.user && id && tab === 'relatorio') logPatientAccess(id, 'view_report') }, [tab, id, session])
+
+  // Impressao do relatorio: o conteudo e copiado para #print-area (unico bloco
+  // visivel em @media print). Fica ligado ao evento beforeprint para que
+  // Ctrl+P / menu do navegador gerem o mesmo PDF que o botao — antes, sem
+  // clicar no botao, o #print-area saia vazio. O afterprint limpa a copia
+  // para nao deixar dado clinico duplicado no DOM.
+  useEffect(() => {
+    if (tab !== 'relatorio') return
+    const clear = () => { const a = document.getElementById('print-area'); if (a) a.innerHTML = '' }
+    window.addEventListener('beforeprint', fillPrintArea)
+    window.addEventListener('afterprint', clear)
+    return () => {
+      window.removeEventListener('beforeprint', fillPrintArea)
+      window.removeEventListener('afterprint', clear)
+      clear()
+    }
+  }, [tab])
 
   const toggleGoal = (g) => {
     const list = form.goals_done.includes(g) ? form.goals_done.filter(x=>x!==g) : [...form.goals_done, g]
@@ -284,9 +310,10 @@ export default function PatientFile() {
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
             <div><h2 style={{fontSize:15,fontWeight:600}}>Relatorio Clinico — {patient.full_name}</h2>
               <p style={{fontSize:11,color:'var(--txt2)'}}>Documento confidencial · LGPD</p></div>
+            {/* fillPrintArea explicito alem do beforeprint: alguns navegadores
+                (Safari mais antigo) nao disparam o evento de forma confiavel. */}
             <button className="btn btn-t btn-sm" onClick={() => {
-              const c = document.getElementById('rpt-content')
-              document.getElementById('print-area').innerHTML = `<div class="rpt-doc">${c.innerHTML}</div>`
+              fillPrintArea()
               window.print()
             }}>🖨 Imprimir / Salvar PDF</button>
           </div>

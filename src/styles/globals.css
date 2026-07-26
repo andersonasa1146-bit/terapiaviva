@@ -209,13 +209,56 @@ body{font-family:var(--font);font-size:14px;color:var(--txt);background:var(--bg
 .clwrn{background:var(--aml);border-left:3px solid var(--am);color:#633806}
 
 /* Print */
+#print-area{display:none}
+@page{ size:A4; margin:12mm 14mm }
 @media print{
-  body{overflow:visible!important}
+  /* html/body/#root tem height:100% na tela; se isso vazar para a impressao
+     o #root (mesmo vazio) ocupa uma folha A4 inteira e o relatorio so comeca
+     na pagina 2 — era essa a causa da primeira pagina em branco. */
+  html,body{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    background:#fff!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  /* Esconde tudo que nao for o print-area: #root e tambem qualquer container
+     que o React tenha anexado ao body (toasts, modais, portais). */
+  body > *:not(#print-area){display:none!important}
+  #root,
   .shell,.sidebar,.topbar,.pf-hdr,.tabs,.dual,.hist-wrap,.btn,
   .pf-actions,.anm-bar,.chdr-act,.tv-tip{display:none!important}
-  #print-area{display:block!important}
+  #print-area{
+    display:block!important;
+    position:static!important;
+    width:auto!important;
+    height:auto!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  #print-area .rpt-doc{
+    border:none!important;
+    box-shadow:none!important;
+    border-radius:0!important;
+    background:#fff!important;
+    padding:0!important;
+    max-width:none!important;
+    margin:0!important;
+  }
+  /* Nada de margem/quebra antes do primeiro bloco: qualquer folga aqui
+     tambem empurraria o conteudo para a folha seguinte. */
+  #print-area > *:first-child{
+    margin-top:0!important;
+    padding-top:0!important;
+    page-break-before:avoid!important;
+    break-before:avoid!important;
+  }
+  /* Quebras de pagina inteligentes */
+  .rpt-sess, .rpt-ai{ page-break-inside:avoid; break-inside:avoid }
+  .rpt-sec{ page-break-inside:avoid; break-inside:avoid }
+  .rpt-logo{ page-break-after:avoid }
 }
-#print-area{display:none}
 
 /* Prospection block */
 .prosp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
