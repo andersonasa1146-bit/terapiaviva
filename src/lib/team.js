@@ -35,11 +35,11 @@ export async function updateTeamMemberRole(id, role) {
 export const ROLE_LABEL = {
   admin: 'Administrador(a)',
   terapeuta: 'Terapeuta',
-  recepcao: 'Recepcao',
+  recepcao: 'Recepção',
 }
 
 export const ROLE_DESCRIPTION = {
-  admin: 'Acesso clinico e financeiro completo, gerencia a equipe',
-  terapeuta: 'Acesso clinico completo (pacientes, sessoes, agenda), sem financeiro',
-  recepcao: 'Apenas pacientes e agenda — sem sessoes, financeiro ou dados sensiveis',
+  admin: 'Acesso clínico e financeiro completo, gerencia a equipe',
+  terapeuta: 'Acesso clínico completo (pacientes, sessões, agenda), sem financeiro',
+  recepcao: 'Apenas pacientes e agenda — sem sessões, financeiro ou dados sensíveis',
 }

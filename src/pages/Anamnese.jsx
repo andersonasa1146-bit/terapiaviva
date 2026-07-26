@@ -7,58 +7,58 @@ import { useToast } from '../components/Toast'
 import { createPatient } from '../lib/patients'
 
 export const ANM_SECTIONS = [
-  { id:'consent', title:'Termo e Consentimento', desc:'Leia com atencao. Em caso de risco imediato: SAMU 192 ou CVV 188.', fields:[
+  { id:'consent', title:'Termo e Consentimento', desc:'Leia com atenção. Em caso de risco imediato: SAMU 192 ou CVV 188.', fields:[
     { k:'c1', l:'Concordo em responder para fins de anamnese', t:'radio', r:true, o:['Concordo','Prefiro conversar antes'] },
-    { k:'c2', l:'Autorizo uso das informacoes para o atendimento', t:'radio', r:true, o:['Sim, autorizo','Nao autorizo','Tenho duvidas'] },
+    { k:'c2', l:'Autorizo uso das informações para o atendimento', t:'radio', r:true, o:['Sim, autorizo','Não autorizo','Tenho dúvidas'] },
   ]},
-  { id:'id', title:'1. Identificacao', desc:'Informacoes basicas.', fields:[
+  { id:'id', title:'1. Identificação', desc:'Informações básicas.', fields:[
     { k:'nome', l:'Nome completo', t:'text', r:true },
     { k:'nasc', l:'Data de nascimento', t:'date' },
     { k:'estado_civil', l:'Estado civil', t:'radio', o:['Solteiro(a)','Casado(a)','Divorciado(a)','Uniao estavel','Viuvo(a)'] },
-    { k:'profissao', l:'Profissao', t:'text' },
+    { k:'profissao', l:'Profissão', t:'text' },
     { k:'tel', l:'WhatsApp', t:'text', r:true },
     { k:'cidade', l:'Cidade/Estado', t:'text' },
   ]},
-  { id:'queixa', title:'2. Queixa Principal', desc:'O que motivou o inicio do acompanhamento.', fields:[
+  { id:'queixa', title:'2. Queixa Principal', desc:'O que motivou o início do acompanhamento.', fields:[
     { k:'qp', l:'Qual seu principal problema neste momento?', t:'textarea', r:true },
     { k:'qe', l:'O que espera do acompanhamento?', t:'textarea' },
-    { k:'qa', l:'Areas que deseja trabalhar', t:'check', o:['Emocional','Espiritual','Familiar','Conjugal','Ansiedade','Tristeza','Traumas','Proposito','Sexualidade','Vicios','Saude fisica'] },
+    { k:'qa', l:'Áreas que deseja trabalhar', t:'check', o:['Emocional','Espiritual','Familiar','Conjugal','Ansiedade','Tristeza','Traumas','Propósito','Sexualidade','Vícios','Saúde física'] },
   ]},
-  { id:'historia', title:'3. Historia de Vida', desc:'Experiencias que podem influenciar o momento atual.', fields:[
+  { id:'historia', title:'3. História de Vida', desc:'Experiências que podem influenciar o momento atual.', fields:[
     { k:'hi', l:'Descreva sua infancia', t:'textarea' },
     { k:'hid', l:'O que foi doloroso na infancia?', t:'textarea' },
-    { k:'hd', l:'Sua visao de Deus', t:'textarea' },
+    { k:'hd', l:'Sua visão de Deus', t:'textarea' },
   ]},
   { id:'dif', title:'4. Dificuldades Pessoais', desc:'Sem julgamento.', fields:[
-    { k:'df', l:'Sentimentos internos', t:'check', o:['Ansiedade excessiva','Tristeza','Inferioridade','Culpa intensa','Medo','Rancor','Desejo de morrer','Nao se aplica'] },
-    { k:'dc', l:'Comportamentos/relacionamentos', t:'check', o:['Manipulacao','Ciumes','Ira','Isolamento','Mentira','Violencia','Nao se aplica'] },
-    { k:'de', l:'Conflitos espirituais', t:'check', o:['Duvidas sobre fe','Religiosidade sem transformacao','Ocultismo anterior','Nao se aplica'] },
+    { k:'df', l:'Sentimentos internos', t:'check', o:['Ansiedade excessiva','Tristeza','Inferioridade','Culpa intensa','Medo','Rancor','Desejo de morrer','Não se aplica'] },
+    { k:'dc', l:'Comportamentos/relacionamentos', t:'check', o:['Manipulação','Ciúmes','Ira','Isolamento','Mentira','Violência','Não se aplica'] },
+    { k:'de', l:'Conflitos espirituais', t:'check', o:['Dúvidas sobre fé','Religiosidade sem transformação','Ocultismo anterior','Não se aplica'] },
   ]},
   { id:'sintomas', title:'5. Sintomas e Alertas', desc:'⚠️ Risco atual: SAMU 192 ou CVV 188.', fields:[
-    { k:'sl', l:'Sintomas vividos', t:'check', o:['Pensamentos de suicidio','Panico','Pesadelos','Alucinacoes','Depressao profunda','Ira','Nao se aplica'] },
-    { k:'ri', l:'Sente-se em risco de ferir a si mesma(o) ou outra pessoa?', t:'radio', r:true, o:['Nao','Sim – estou em risco','Nao sei','Prefiro conversar'] },
+    { k:'sl', l:'Sintomas vividos', t:'check', o:['Pensamentos de suicídio','Pânico','Pesadelos','Alucinações','Depressão profunda','Ira','Não se aplica'] },
+    { k:'ri', l:'Sente-se em risco de ferir a si mesma(o) ou outra pessoa?', t:'radio', r:true, o:['Não','Sim – estou em risco','Não sei','Prefiro conversar'] },
   ]},
-  { id:'saude', title:'6. Saude', desc:'Fatores clinicos.', fields:[
-    { k:'sa', l:'Como avalia sua saude fisica?', t:'radio', o:['Excelente','Boa','Regular','Decaindo','Ruim'] },
+  { id:'saude', title:'6. Saúde', desc:'Fatores clínicos.', fields:[
+    { k:'sa', l:'Como avalia sua saúde física?', t:'radio', o:['Excelente','Boa','Regular','Decaindo','Ruim'] },
     { k:'sm', l:'Medicamentos atuais', t:'textarea' },
-    { k:'sd', l:'Diagnosticos medicos', t:'textarea' },
-    { k:'re', l:'Se considera religiosa/espiritualizada?', t:'radio', o:['Sim','Nao','Em parte','Em busca'] },
+    { k:'sd', l:'Diagnósticos médicos', t:'textarea' },
+    { k:'re', l:'Se considera religiosa/espiritualizada?', t:'radio', o:['Sim','Não','Em parte','Em busca'] },
     { k:'ig', l:'Igreja/denominacao', t:'text' },
-    { k:'fc', l:'Tem certeza da salvacao?', t:'radio', o:['Sim','Nao','Duvidas','Nao se aplica'] },
+    { k:'fc', l:'Tem certeza da salvação?', t:'radio', o:['Sim','Não','Dúvidas','Não se aplica'] },
   ]},
-  { id:'familia', title:'7. Familia', desc:'Vinculos.', fields:[
+  { id:'familia', title:'7. Família', desc:'Vínculos.', fields:[
     { k:'fp', l:'Relacionamento dos seus pais entre si', t:'textarea' },
     { k:'fpa', l:'Seu relacionamento com o pai', t:'textarea' },
-    { k:'fma', l:'Seu relacionamento com a mae', t:'textarea' },
+    { k:'fma', l:'Seu relacionamento com a mãe', t:'textarea' },
     { k:'rd', l:'Relacionamento conjugal/afetivo atual', t:'textarea' },
   ]},
-  { id:'close', title:'8. Encerramento', desc:'Ultimas informacoes.', fields:[
+  { id:'close', title:'8. Encerramento', desc:'Últimas informações.', fields:[
     { k:'obj', l:'Objetivos para o acompanhamento', t:'textarea', r:true },
     { k:'ext', l:'Algo importante que devo saber?', t:'textarea' },
     { k:'conf', l:'Confirmo respostas livres e conscientes', t:'radio', r:true, o:['Sim, confirmo','Desejo conversar antes'] },
   ]},
 ]
-export const ANM_TABS = ['Consent.','Identificacao','Queixa','Historia','Dificuldades','Sintomas','Saude','Familia','Encerramento']
+export const ANM_TABS = ['Consent.','Identificação','Queixa','História','Dificuldades','Sintomas','Saúde','Família','Encerramento']
 
 // Mapeia risco da anamnese (autorrelato + avaliacao de IA, se houver) para o
 // nivel de risco usado no cadastro do paciente.
@@ -127,7 +127,7 @@ export default function Anamnese() {
     const d = selected.answers || {}
     const nome = (d.nome || '').trim()
     if (!nome) {
-      toast.error('Esta anamnese nao tem o nome preenchido — cadastre manualmente em Pacientes.')
+      toast.error('Esta anamnese não tem o nome preenchido — cadastre manualmente em Pacientes.')
       return
     }
     setCreatingPatient(true)
@@ -165,7 +165,7 @@ export default function Anamnese() {
     return (
       <div style={{padding:14}}>
         <div className="card"><div className="cbdy" style={{padding:'22px 16px',textAlign:'center',fontSize:12.5,color:'var(--txt2)'}}>
-          Seu papel na equipe nao tem acesso a anamneses e avaliacoes clinicas.
+          Seu papel na equipe não tem acesso a anamneses e avaliações clínicas.
         </div></div>
       </div>
     )
@@ -189,13 +189,13 @@ export default function Anamnese() {
             <div className="chdr">Novo link de anamnese</div>
             <div className="cbdy">
               <p style={{fontSize:11.5,color:'var(--txt2)',marginBottom:10}}>
-                Se este formulario e para alguem que ja e seu paciente, vincule abaixo (o resultado ja aparece
-                direto no prontuario dela). Se e alguem novo, deixe em branco — depois de responder, voce podera
-                cadastrar como paciente com um clique, usando os dados que a pessoa ja preencheu.
+                Se este formulário é para alguém que já é seu paciente, vincule abaixo (o resultado já aparece
+                direto no prontuário dela). Se é alguém novo, deixe em branco — depois de responder, você poderá
+                cadastrar como paciente com um clique, usando os dados que a pessoa já preencheu.
               </p>
               <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
                 <div className="field" style={{flex:1,minWidth:200,margin:0}}>
-                  <label>Vincular a um paciente ja cadastrado (opcional)</label>
+                  <label>Vincular a um paciente já cadastrado (opcional)</label>
                   <select value={linkPatientId} onChange={e=>setLinkPatientId(e.target.value)}>
                     <option value="">Pessoa nova (cadastrar depois)</option>
                     {patients.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
@@ -247,13 +247,13 @@ export default function Anamnese() {
         <div className="card" style={{margin:'12px 12px 0'}}>
           <div className="cbdy" style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 13px'}}>
             <span style={{fontSize:12}}>✅ Vinculada ao paciente <strong>{linkedPatient.full_name}</strong></span>
-            <Link className="btn btn-sm btn-p" to={`/patients/${linkedPatient.id}`}>Ver prontuario ›</Link>
+            <Link className="btn btn-sm btn-p" to={`/patients/${linkedPatient.id}`}>Ver prontuário ›</Link>
           </div>
         </div>
       ) : canRegister ? (
         <div className="card" style={{margin:'12px 12px 0'}}>
           <div className="cbdy" style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 13px',flexWrap:'wrap',gap:8}}>
-            <span style={{fontSize:12,color:'var(--txt2)'}}>Esta anamnese ainda nao esta vinculada a nenhum paciente.</span>
+            <span style={{fontSize:12,color:'var(--txt2)'}}>Esta anamnese ainda não está vinculada a nenhum paciente.</span>
             <button className="btn btn-sm btn-p" onClick={registerPatientFromAnamnese} disabled={creatingPatient}>
               {creatingPatient ? 'Cadastrando…' : '+ Cadastrar como paciente'}
             </button>
@@ -271,7 +271,7 @@ export default function Anamnese() {
             {ANM_SECTIONS[tab].fields.map(f => {
               const v = anmGet(f.k)
               const list = Array.isArray(v) && v.length ? v.map(x => <span key={x} className="tag">{x}</span>)
-                        : (v && v.toString().trim() ? <span className="ans-v">{v.toString()}</span> : <span className="ans-v ans-empty">Nao informado</span>)
+                        : (v && v.toString().trim() ? <span className="ans-v">{v.toString()}</span> : <span className="ans-v ans-empty">Não informado</span>)
               return (
                 <div className="ans-item" key={f.k}>
                   <div className="ans-q">{f.l}</div>
@@ -283,14 +283,14 @@ export default function Anamnese() {
         </div>
 
         <div className="t-pnl">
-          <div className="t-pnl-hdr"><div style={{width:8,height:8,borderRadius:'50%',background:'var(--t)'}}></div>Avaliacao Preliminar IA</div>
+          <div className="t-pnl-hdr"><div style={{width:8,height:8,borderRadius:'50%',background:'var(--t)'}}></div>Avaliação Preliminar IA</div>
           <div style={{padding:13,overflowY:'auto'}}>
             {aiLoad ? <div className="loading"><div className="spin"></div>Analisando…</div>
             : aiErr ? <div style={{padding:14,fontSize:12,color:'var(--red)'}}>{aiErr}<br/><br/><button className="btn btn-sm" onClick={runAI}>Tentar novamente</button></div>
             : ai ? <AnamAI r={ai} onRerun={runAI} />
             : <div style={{padding:18,textAlign:'center'}}>
-                <p style={{marginBottom:12,fontSize:12,color:'var(--txt2)',lineHeight:1.6}}>Gere a avaliacao preliminar baseada nos dados da anamnese.</p>
-                <button className="btn btn-t" onClick={runAI}>Gerar avaliacao com IA</button>
+                <p style={{marginBottom:12,fontSize:12,color:'var(--txt2)',lineHeight:1.6}}>Gere a avaliação preliminar baseada nos dados da anamnese.</p>
+                <button className="btn btn-t" onClick={runAI}>Gerar avaliação com IA</button>
               </div>}
           </div>
         </div>
@@ -307,10 +307,10 @@ function AnamAI({ r, onRerun }) {
     <>
       <div className={`ai-pill ${rc}`}>⚠ {rn}</div>
       <div className="ai-blk"><div className="ai-ttl">Justificativa</div><p style={{fontSize:12,lineHeight:1.6,color:'var(--txt2)'}}>{r.justificativa_risco}</p></div>
-      <div className="ai-blk"><div className="ai-ttl">Foco primeira sessao</div><div className="ai-focus">{r.foco_primeira_sessao}</div></div>
-      <div className="ai-blk"><div className="ai-ttl">Indicadores clinicos</div><List a={r.indicadores_clinicos} /></div>
+      <div className="ai-blk"><div className="ai-ttl">Foco primeira sessão</div><div className="ai-focus">{r.foco_primeira_sessao}</div></div>
+      <div className="ai-blk"><div className="ai-ttl">Indicadores clínicos</div><List a={r.indicadores_clinicos} /></div>
       <div className="ai-blk"><div className="ai-ttl">Hipoteses</div><List a={r.hipoteses_diagnosticas} /></div>
-      <div className="ai-blk"><div className="ai-ttl">Observacoes espirituais</div><List a={r.observacoes_espirituais} /></div>
+      <div className="ai-blk"><div className="ai-ttl">Observações espirituais</div><List a={r.observacoes_espirituais} /></div>
       <div className="ai-blk"><div className="ai-ttl">Fatores de protecao</div><List a={r.fatores_protecao} /></div>
       <div className="ai-blk"><div className="ai-ttl">Abordagens recomendadas</div><List a={r.abordagens_recomendadas} /></div>
       <div className="ai-blk"><div className="ai-ttl">Nota para a terapeuta</div><div className="ai-note">{r.nota_terapeuta}</div></div>

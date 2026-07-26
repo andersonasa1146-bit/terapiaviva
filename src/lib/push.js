@@ -27,11 +27,11 @@ export async function getPushSubscriptionStatus() {
 }
 
 export async function subscribeToPush(ownerId) {
-  if (!isPushSupported()) throw new Error('Este navegador nao suporta notificacoes push.')
-  if (!VAPID_PUBLIC_KEY) throw new Error('VITE_VAPID_PUBLIC_KEY nao configurada neste ambiente.')
+  if (!isPushSupported()) throw new Error('Este navegador não suporta notificações push.')
+  if (!VAPID_PUBLIC_KEY) throw new Error('VITE_VAPID_PUBLIC_KEY não configurada neste ambiente.')
 
   const permission = await Notification.requestPermission()
-  if (permission !== 'granted') throw new Error('Permissao de notificacao negada.')
+  if (permission !== 'granted') throw new Error('Permissão de notificação negada.')
 
   const reg = await navigator.serviceWorker.ready
   let sub = await reg.pushManager.getSubscription()
@@ -45,7 +45,7 @@ export async function subscribeToPush(ownerId) {
   const json = sub.toJSON()
   const { data: sess } = await supabase.auth.getSession()
   const userId = sess?.session?.user?.id
-  if (!userId) throw new Error('Sessao invalida.')
+  if (!userId) throw new Error('Sessão inválida.')
 
   const { error } = await supabase.from('push_subscriptions').upsert({
     endpoint: json.endpoint,
@@ -73,7 +73,7 @@ export async function unsubscribeFromPush() {
 export async function sendTestPush() {
   const { data: sess } = await supabase.auth.getSession()
   const token = sess?.session?.access_token
-  if (!token) throw new Error('Voce precisa estar autenticada.')
+  if (!token) throw new Error('Você precisa estar autenticada.')
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-push`
   const res = await fetch(url, {
     method: 'POST',

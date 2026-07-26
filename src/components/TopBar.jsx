@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { initials } from '../lib/format'
 import { SITE } from '../config/site'
 
-const ROLE_BADGE = { admin: 'Admin', terapeuta: 'Terapeuta', recepcao: 'Recepcao' }
+const ROLE_BADGE = { admin: 'Admin', terapeuta: 'Terapeuta', recepcao: 'Recepção' }
 
 export default function TopBar() {
   const { profile, teamRole, isOwner, signOut } = useAuth()
@@ -25,7 +25,7 @@ export default function TopBar() {
       <div className="topbar-r">
         <span className="top-date">{today}</span>
         {!isOwner && (
-          <span className="api-badge" style={{background:'#EEEDFE',color:'#3C3489'}} title="Voce esta operando na equipe desta clinica">
+          <span className="api-badge" style={{background:'#EEEDFE',color:'#3C3489'}} title="Você está operando na equipe desta clínica">
             👤 {ROLE_BADGE[teamRole] || teamRole}
           </span>
         )}

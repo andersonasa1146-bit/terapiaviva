@@ -30,7 +30,7 @@ export default function MFAChallenge() {
       await challengeAndVerify(factorId, code.trim())
       await refreshMfaStatus()
     } catch (e2) {
-      setErr(e2.message || 'Codigo invalido. Tente novamente.')
+      setErr(e2.message || 'Código inválido. Tente novamente.')
     }
     setBusy(false)
   }
@@ -39,21 +39,21 @@ export default function MFAChallenge() {
     <div className="auth-shell">
       <div className="auth-card">
         <h1>🌿 {SITE.appName}</h1>
-        <p className="sub">Verificacao em duas etapas</p>
+        <p className="sub">Verificação em duas etapas</p>
         {loadingFactors ? (
           <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--txt2)' }}>Carregando…</div>
         ) : !factorId ? (
           <div style={{ fontSize: 12.5, color: 'var(--red)', textAlign: 'center' }}>
-            Nao foi possivel localizar seu fator de autenticacao. Entre em contato com a proprietaria da conta.
+            Não foi possível localizar seu fator de autenticação. Entre em contato com a proprietária da conta.
           </div>
         ) : (
           <form onSubmit={submit}>
             <p style={{ fontSize: 12, color: 'var(--txt2)', marginBottom: 12, lineHeight: 1.6 }}>
-              Abra o aplicativo autenticador (Google Authenticator, Authy, 1Password, etc.) e digite o codigo de 6
-              digitos exibido para esta conta.
+              Abra o aplicativo autenticador (Google Authenticator, Authy, 1Password, etc.) e digite o código de 6
+              dígitos exibido para esta conta.
             </p>
             <div className="field">
-              <label>Codigo de verificacao</label>
+              <label>Código de verificação</label>
               <input
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}

@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: appName,
           short_name: appName,
-          description: 'Gestao de prontuario, agenda e financeiro para terapeutas.',
+          description: 'Gestão de prontuário, agenda e financeiro para terapeutas.',
           lang: 'pt-BR',
           start_url: '/',
           display: 'standalone',

@@ -34,7 +34,7 @@ export default function Prayer() {
   return (
     <div style={{padding:14}}>
       <div style={{marginBottom:12}}>
-        <h2 style={{fontSize:15,fontWeight:600}}>🙏 Mural de Oracao</h2>
+        <h2 style={{fontSize:15,fontWeight:600}}>🙏 Mural de Oração</h2>
       </div>
       <div style={{background:'linear-gradient(135deg,#1a4a3a,#2d6e52)',borderRadius:'var(--r)',padding:15,color:'#fff',marginBottom:12,textAlign:'center',fontSize:12,fontStyle:'italic',lineHeight:1.7}}>
         "Confessai, pois, os vossos pecados uns aos outros, e orai uns pelos outros, para que sareis." — Tiago 5:16
@@ -44,7 +44,7 @@ export default function Prayer() {
         <div className="chdr">+ Adicionar intencao</div>
         <div className="cbdy">
           <form onSubmit={add} style={{display:'grid',gridTemplateColumns:'1fr 200px auto',gap:8}}>
-            <input value={text} onChange={e=>setText(e.target.value)} placeholder="Ex.: Restauracao do casamento…" style={{border:'1px solid var(--bdr2)',borderRadius:7,padding:'7px 10px',fontSize:12}} />
+            <input value={text} onChange={e=>setText(e.target.value)} placeholder="Ex.: Restauração do casamento…" style={{border:'1px solid var(--bdr2)',borderRadius:7,padding:'7px 10px',fontSize:12}} />
             <select value={pid} onChange={e=>setPid(e.target.value)} style={{border:'1px solid var(--bdr2)',borderRadius:7,padding:'7px 10px',fontSize:12}}>
               <option value="">Sem paciente</option>
               {patients.map(p=><option key={p.id} value={p.id}>{p.full_name}</option>)}

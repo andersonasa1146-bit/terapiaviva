@@ -44,7 +44,7 @@ export default function AdminPanel() {
     setSavingPrice(true)
     try {
       await setMrrPrice(price)
-      toast.success('Preco de referencia atualizado.')
+      toast.success('Preço de referência atualizado.')
       await load()
     } catch (err) {
       toast.error(err.message)
@@ -67,7 +67,7 @@ export default function AdminPanel() {
       <div style={{ marginBottom: 12 }}>
         <h2 style={{ fontSize: 15, fontWeight: 600 }}>🛠 Painel administrativo</h2>
         <p style={{ fontSize: 11, color: 'var(--txt2)' }}>
-          Visao agregada de todas as contas/clinicas cadastradas nesta instalacao — uso, planos e receita
+          Visão agregada de todas as contas/clínicas cadastradas nesta instalação — uso, planos e receita
           recorrente estimada. Visivel apenas para o operador da plataforma.
         </p>
       </div>
@@ -78,12 +78,12 @@ export default function AdminPanel() {
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 14 }}>
             {[
-              { label: 'Contas/clinicas', value: stats?.total_accounts ?? 0 },
+              { label: 'Contas/clínicas', value: stats?.total_accounts ?? 0 },
               { label: 'Assinaturas ativas', value: stats?.active_subscriptions ?? 0 },
               { label: 'Em trial', value: stats?.trial_accounts ?? 0 },
               { label: 'Canceladas', value: stats?.cancelled_accounts ?? 0 },
               { label: 'Pacientes cadastrados', value: stats?.total_patients ?? 0 },
-              { label: 'Chamadas de IA (mes)', value: stats?.total_ai_calls_this_month ?? 0 },
+              { label: 'Chamadas de IA (mês)', value: stats?.total_ai_calls_this_month ?? 0 },
               { label: 'MRR estimado', value: fmtBRL(stats?.mrr_estimate) },
             ].map((k) => (
               <div key={k.label} className="card">
@@ -96,11 +96,11 @@ export default function AdminPanel() {
           </div>
 
           <div className="card" style={{ marginBottom: 14 }}>
-            <div className="chdr">💵 Preco de referencia para o calculo de MRR</div>
+            <div className="chdr">💵 Preço de referência para o cálculo de MRR</div>
             <div className="cbdy" style={{ padding: '10px 13px' }}>
               <p style={{ fontSize: 11.5, color: 'var(--txt2)', marginBottom: 10 }}>
-                Usado apenas para estimar a receita recorrente acima (numero de assinaturas ativas x este valor).
-                Nao altera a cobranca real, que e configurada via <code>MP_PLAN_PRICE</code> nas secrets do Supabase.
+                Usado apenas para estimar a receita recorrente acima (número de assinaturas ativas x este valor).
+                Não altera a cobrança real, que é configurada via <code>MP_PLAN_PRICE</code> nas secrets do Supabase.
               </p>
               <form onSubmit={savePrice} style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
                 <div className="field" style={{ maxWidth: 140, margin: 0 }}>

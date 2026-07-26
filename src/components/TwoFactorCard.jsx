@@ -38,7 +38,7 @@ export default function TwoFactorCard() {
     setBusy(true)
     try {
       await verifyEnrollment(enrolling.id, code.trim())
-      toast.success('Autenticacao de dois fatores ativada!')
+      toast.success('Autenticação de dois fatores ativada!')
       setEnrolling(null)
       load()
     } catch (e2) {
@@ -48,7 +48,7 @@ export default function TwoFactorCard() {
   }
 
   const remove = async (f) => {
-    const ok = await confirm('Desativar a autenticacao de dois fatores desta conta? Isso reduz a seguranca do seu login.', { danger: true, confirmLabel: 'Desativar' })
+    const ok = await confirm('Desativar a autenticação de dois fatores desta conta? Isso reduz a segurança do seu login.', { danger: true, confirmLabel: 'Desativar' })
     if (!ok) return
     try {
       await unenrollFactor(f.id)
@@ -61,11 +61,11 @@ export default function TwoFactorCard() {
 
   return (
     <div className="card" style={{ marginBottom: 12 }}>
-      <div className="chdr">🔐 Autenticacao de dois fatores (2FA)</div>
+      <div className="chdr">🔐 Autenticação de dois fatores (2FA)</div>
       <div className="cbdy">
         <p style={{ fontSize: 11.5, color: 'var(--txt2)', marginBottom: 12 }}>
-          Adiciona uma segunda etapa de verificacao (codigo de 6 digitos de um aplicativo autenticador) ao
-          fazer login, alem da senha. Protege sua conta mesmo que a senha vaze.
+          Adiciona uma segunda etapa de verificação (código de 6 dígitos de um aplicativo autenticador) ao
+          fazer login, além da senha. Protege sua conta mesmo que a senha vaze.
         </p>
 
         {loading ? (
@@ -87,7 +87,7 @@ export default function TwoFactorCard() {
               </div>
             </div>
             <div className="field" style={{ maxWidth: 200 }}>
-              <label>Codigo de 6 digitos</label>
+              <label>Código de 6 dígitos</label>
               <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g,'').slice(0,6))}
                 inputMode="numeric" placeholder="000000" style={{ letterSpacing: 3, textAlign: 'center' }} />
             </div>

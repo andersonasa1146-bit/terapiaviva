@@ -28,7 +28,7 @@ export default function SignaturePanel({ patientId }) {
     setSending(true)
     try {
       await signReport(patientId)
-      toast.success('Relatorio enviado para assinatura digital.')
+      toast.success('Relatório enviado para assinatura digital.')
       load()
     } catch (e) { toast.error(e.message) }
     setSending(false)
@@ -37,7 +37,7 @@ export default function SignaturePanel({ patientId }) {
   return (
     <div className="card" style={{ marginTop: 12 }}>
       <div className="chdr">
-        ✍️ Assinatura digital do relatorio
+        ✍️ Assinatura digital do relatório
         <div className="chdr-act">
           <button className="btn btn-sm btn-p" onClick={send} disabled={sending}>
             {sending ? 'Enviando…' : '+ Assinar digitalmente'}
@@ -46,8 +46,8 @@ export default function SignaturePanel({ patientId }) {
       </div>
       <div className="cbdy" style={{ padding: '10px 13px' }}>
         <p style={{ fontSize: 11, color: 'var(--txt2)', marginBottom: 10 }}>
-          Envia o historico de sessoes deste paciente para assinatura eletronica, dando validade e
-          autenticidade adicionais ao relatorio emitido.
+          Envia o histórico de sessões deste paciente para assinatura eletrônica, dando validade e
+          autenticidade adicionais ao relatório emitido.
         </p>
         {loading ? (
           <div style={{ padding: '10px 0', textAlign: 'center', fontSize: 12, color: 'var(--txt3)' }}>Carregando…</div>
@@ -69,7 +69,7 @@ export default function SignaturePanel({ patientId }) {
             </div>
           )
         }) : (
-          <div style={{ padding: '14px 0', textAlign: 'center', fontSize: 12, color: 'var(--txt3)' }}>Nenhum relatorio enviado para assinatura ainda.</div>
+          <div style={{ padding: '14px 0', textAlign: 'center', fontSize: 12, color: 'var(--txt3)' }}>Nenhum relatório enviado para assinatura ainda.</div>
         )}
       </div>
     </div>

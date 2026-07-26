@@ -5,8 +5,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/Toast'
 
 const SOURCE_LABEL = {
-  clinical_scale: '📊 Escala clinica',
-  ai_session: '🧠 IA de sessao',
+  clinical_scale: '📊 Escala clínica',
+  ai_session: '🧠 IA de sessão',
   ai_anamnese: '🧠 IA de anamnese',
   self_report: '🙋 Autorrelato do paciente',
 }
@@ -36,7 +36,7 @@ export default function Alerts() {
   useEffect(() => { if (session?.user) load() }, [session, showResolved])
 
   const resolve = async (a) => {
-    const ok = await confirm('Marcar este alerta como resolvido? Use apos ter avaliado o risco e tomado as medidas necessarias.', { confirmLabel: 'Marcar resolvido' })
+    const ok = await confirm('Marcar este alerta como resolvido? Use após ter avaliado o risco e tomado as medidas necessárias.', { confirmLabel: 'Marcar resolvido' })
     if (!ok) return
     const { error } = await supabase.from('risk_alerts')
       .update({ resolved: true, resolved_at: new Date().toISOString() }).eq('id', a.id)
@@ -51,7 +51,7 @@ export default function Alerts() {
         <div>
           <h2 style={{ fontSize: 17, fontWeight: 600 }}>🚨 Alertas de risco</h2>
           <p style={{ fontSize: 11.5, color: 'var(--txt2)' }}>
-            Sinais automaticos de risco vindos de escalas clinicas, analises de IA e autorrelato de pacientes.
+            Sinais automáticos de risco vindos de escalas clínicas, análises de IA e autorrelato de pacientes.
           </p>
         </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>

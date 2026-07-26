@@ -17,12 +17,12 @@ export async function listAccessAuditLog({ patientId = null, limit = 200 } = {})
 }
 
 export const ACTION_LABEL = {
-  view_patient: 'Abriu o prontuario',
-  view_session: 'Visualizou sessoes',
-  view_scale: 'Visualizou escalas clinicas',
+  view_patient: 'Abriu o prontuário',
+  view_session: 'Visualizou sessões',
+  view_scale: 'Visualizou escalas clínicas',
   view_files: 'Visualizou arquivos/exames',
-  view_billing: 'Visualizou cobranca',
-  view_report: 'Gerou relatorio/PDF',
+  view_billing: 'Visualizou cobrança',
+  view_report: 'Gerou relatório/PDF',
   export_patient_data: 'Exportou dados (LGPD)',
   erase_patient: 'Excluiu dados (LGPD)',
 }

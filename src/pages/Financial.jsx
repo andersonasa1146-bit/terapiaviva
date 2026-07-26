@@ -133,7 +133,7 @@ export default function Financial() {
       .order('entry_date', { ascending: true })
     setExporting(false)
     if (error) { toast.error(error.message); return }
-    if (!data?.length) { toast.error('Nenhum lancamento no periodo selecionado.'); return }
+    if (!data?.length) { toast.error('Nenhum lancamento no período selecionado.'); return }
     downloadCsv(`lancamentos-financeiros_${range.from}_a_${range.to}.csv`, entriesToCsv(data))
     toast.success(`${data.length} lancamento(s) exportado(s).`)
   }
@@ -148,7 +148,7 @@ export default function Financial() {
     return (
       <div style={{padding:14}}>
         <div className="card"><div className="cbdy" style={{padding:'22px 16px',textAlign:'center',fontSize:12.5,color:'var(--txt2)'}}>
-          Seu papel na equipe nao tem acesso aos dados financeiros da clinica.
+          Seu papel na equipe não tem acesso aos dados financeiros da clínica.
         </div></div>
       </div>
     )
@@ -157,33 +157,33 @@ export default function Financial() {
   return (
     <div style={{padding:14}}>
       <div style={{marginBottom:12}}>
-        <h2 style={{fontSize:15,fontWeight:600}}>💰 Gestao Financeira</h2>
-        <p style={{fontSize:11,color:'var(--txt2)'}}>Comparativo 12 meses com YoY (year-over-year), composicao por categoria e ideias de crescimento.</p>
+        <h2 style={{fontSize:15,fontWeight:600}}>💰 Gestão Financeira</h2>
+        <p style={{fontSize:11,color:'var(--txt2)'}}>Comparativo 12 meses com YoY (year-over-year), composição por categoria e ideias de crescimento.</p>
       </div>
 
       {/* ---------- KPIs do mes ---------- */}
       <div className="stats stats-4">
         <div className="sc">
-          <div className="sl">Receita do mes</div>
+          <div className="sl">Receita do mês</div>
           <div className="sv" style={{color:'#27500A'}}>{brl(kpis.revenue_month)}</div>
           <div className="ss">
-            {kpis.mom_delta_pct >= 0 ? '📈' : '📉'} {kpis.mom_delta_pct.toFixed(1)}% vs mes anterior
+            {kpis.mom_delta_pct >= 0 ? '📈' : '📉'} {kpis.mom_delta_pct.toFixed(1)}% vs mês anterior
           </div>
         </div>
         <div className="sc">
-          <div className="sl">Despesas do mes</div>
+          <div className="sl">Despesas do mês</div>
           <div className="sv" style={{color:'var(--red)'}}>{brl(kpis.expenses_month)}</div>
           <div className="ss">Fluxo controlado</div>
         </div>
         <div className="sc">
-          <div className="sl">Liquido</div>
+          <div className="sl">Líquido</div>
           <div className="sv" style={{color:'var(--p)'}}>{brl(kpis.net_month)}</div>
           <div className="ss">Margem: {kpis.revenue_month ? ((kpis.net_month/kpis.revenue_month)*100).toFixed(0) : 0}%</div>
         </div>
         <div className="sc">
           <div className="sl">Comparativo YoY</div>
           <div className="sv" style={{color: kpis.yoy_delta_pct>=0?'var(--p)':'var(--red)'}}>{kpis.yoy_delta_pct>=0?'+':''}{kpis.yoy_delta_pct.toFixed(1)}%</div>
-          <div className="ss">vs mesmo mes ano passado</div>
+          <div className="ss">vs mesmo mês ano passado</div>
         </div>
       </div>
 
@@ -218,7 +218,7 @@ export default function Financial() {
       {/* ---------- Grafico Liquido comparado ---------- */}
       <div className="cgrid" style={{margin:'0 0 12px', gridTemplateColumns:'1fr 1fr'}}>
         <div className="card">
-          <div className="chdr">📈 Liquido — este ano vs ano anterior</div>
+          <div className="chdr">📈 Líquido — este ano vs ano anterior</div>
           <div className="cbdy" style={{padding:'12px 8px 6px'}}>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={series} margin={{top:8,right:16,left:-8,bottom:0}}>
@@ -227,15 +227,15 @@ export default function Financial() {
                 <YAxis tick={{fontSize:11,fill:'#556866'}} tickFormatter={(v)=>`R$${(v/1000).toFixed(0)}k`} />
                 <Tooltip content={<FinancialTip />} />
                 <Legend wrapperStyle={{fontSize:11}} iconType="circle" />
-                <Line type="monotone" dataKey="net" name="Liquido atual" stroke="#1D9E75" strokeWidth={2.5} dot={{r:3}} />
-                <Line type="monotone" dataKey="net_prev" name="Liquido ano anterior" stroke="#8FA8A5" strokeDasharray="5 5" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="net" name="Líquido atual" stroke="#1D9E75" strokeWidth={2.5} dot={{r:3}} />
+                <Line type="monotone" dataKey="net_prev" name="Líquido ano anterior" stroke="#8FA8A5" strokeDasharray="5 5" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className="card">
-          <div className="chdr">🎯 Composicao por categoria (12 meses)</div>
+          <div className="chdr">🎯 Composição por categoria (12 meses)</div>
           <div className="cbdy" style={{padding:'12px 8px 6px'}}>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={catData} layout="vertical" margin={{top:4,right:16,left:20,bottom:0}}>
@@ -258,7 +258,7 @@ export default function Financial() {
         <div className="cbdy">
           <div style={{display:'flex',alignItems:'flex-end',gap:10,flexWrap:'wrap',marginBottom:10}}>
             <div className="field" style={{marginBottom:0}}><label>De</label><input type="date" value={range.from} onChange={e=>setRange({...range,from:e.target.value})} /></div>
-            <div className="field" style={{marginBottom:0}}><label>Ate</label><input type="date" value={range.to} onChange={e=>setRange({...range,to:e.target.value})} /></div>
+            <div className="field" style={{marginBottom:0}}><label>Até</label><input type="date" value={range.to} onChange={e=>setRange({...range,to:e.target.value})} /></div>
             <button className="btn btn-p btn-sm" onClick={exportEntriesCsv} disabled={exporting}>
               {exporting ? 'Exportando…' : '⬇ Exportar lancamentos (CSV)'}
             </button>
@@ -266,11 +266,11 @@ export default function Financial() {
           </div>
           <p style={{fontSize:11,color:'var(--txt2)'}}>Os arquivos CSV abrem diretamente no Excel, Google Sheets ou LibreOffice.</p>
           <div className="callout clwrn" style={{marginTop:10}}>
-            <strong>Nota fiscal eletronica (NF-e/NFS-e)</strong>
-            A emissao de nota fiscal exige integracao com um provedor fiscal (ex.: Focus NFe, eNotas, NFe.io),
-            certificado digital e dados tributarios (CNPJ, regime, municipio) proprios de cada terapeuta —
-            por isso nao esta incluida automaticamente. Quando tiver esses dados, e possivel integrar um desses
-            provedores via uma nova Edge Function, seguindo o mesmo padrao usado para Mercado Pago.
+            <strong>Nota fiscal eletrônica (NF-e/NFS-e)</strong>
+            A emissão de nota fiscal exige integração com um provedor fiscal (ex.: Focus NFe, eNotas, NFe.io),
+            certificado digital e dados tributarios (CNPJ, regime, municipio) próprios de cada terapeuta —
+            por isso não está incluída automaticamente. Quando tiver esses dados, é possível integrar um desses
+            provedores via uma nova Edge Function, seguindo o mesmo padrão usado para Mercado Pago.
           </div>
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function Financial() {
                 <select value={form.category} onChange={(e)=>setForm({...form, category:e.target.value})}>
                   {form.kind==='receita' ? (
                     <>
-                      <option value="sessao">Sessao</option>
+                      <option value="sessao">Sessão</option>
                       <option value="pacote">Pacote</option>
                       <option value="workshop">Workshop</option>
                       <option value="palestra">Palestra</option>
@@ -304,7 +304,7 @@ export default function Financial() {
                       <option value="aluguel">Aluguel</option>
                       <option value="plataforma">Plataforma</option>
                       <option value="marketing">Marketing</option>
-                      <option value="formacao">Formacao</option>
+                      <option value="formacao">Formação</option>
                       <option value="material">Material</option>
                       <option value="impostos">Impostos</option>
                       <option value="outros">Outros</option>
@@ -313,8 +313,8 @@ export default function Financial() {
                 </select>
               </div>
               <div className="field">
-                <label>Descricao</label>
-                <input value={form.description} onChange={(e)=>setForm({...form, description:e.target.value})} placeholder="Ex.: Sessao Maria das Gracas" required />
+                <label>Descrição</label>
+                <input value={form.description} onChange={(e)=>setForm({...form, description:e.target.value})} placeholder="Ex.: Sessão Maria das Graças" required />
               </div>
               <div className="field">
                 <label>Valor (R$)</label>
@@ -330,7 +330,7 @@ export default function Financial() {
         </div>
 
         <div className="card">
-          <div className="chdr">📒 Ultimos lancamentos</div>
+          <div className="chdr">📒 Últimos lancamentos</div>
           <div className="cbdy" style={{padding:'2px 13px'}}>
             {entries.length ? entries.map((m) => (
               <div key={m.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--bdr)'}}>
@@ -342,7 +342,7 @@ export default function Financial() {
                   {m.kind==='receita' ? '+ ' : '- '}{brl(m.amount)}
                 </span>
               </div>
-            )) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhum lancamento — comece pelo formulario ao lado.</div>}
+            )) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhum lançamento — comece pelo formulário ao lado.</div>}
           </div>
         </div>
       </div>
@@ -382,7 +382,7 @@ export default function Financial() {
             <strong>💡 Metas de crescimento sugeridas para 90 dias</strong>
             1) Publicar 24 conteudos (Reels/Blog) · 2) Fechar 2 parcerias locais · 3) Lancar 1 workshop pago ·
             4) Iniciar 1 curso de aperfeicoamento · 5) Reativar 10 ex-pacientes por WhatsApp ·
-            6) Alcancar +25% de receita YoY no proximo trimestre.
+            6) Alcançar +25% de receita YoY no próximo trimestre.
           </div>
         </div>
       </div>

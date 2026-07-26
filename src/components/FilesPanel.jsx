@@ -59,7 +59,7 @@ export default function FilesPanel({ patientId }) {
       if (insErr) toast.error(insErr.message)
     }
     setUploading(false)
-    toast.success('Upload concluido.')
+    toast.success('Upload concluído.')
     load()
   }
 
@@ -70,12 +70,12 @@ export default function FilesPanel({ patientId }) {
   }
 
   const remove = async (f) => {
-    const ok = await confirm(`Excluir o arquivo "${f.file_name}"? Esta acao nao pode ser desfeita.`, { danger: true, confirmLabel: 'Excluir' })
+    const ok = await confirm(`Excluir o arquivo "${f.file_name}"? Esta ação não pode ser desfeita.`, { danger: true, confirmLabel: 'Excluir' })
     if (!ok) return
     await supabase.storage.from(BUCKET).remove([f.storage_path])
     const { error } = await supabase.from('patient_files').delete().eq('id', f.id)
     if (error) { toast.error(error.message); return }
-    toast.success('Arquivo excluido.')
+    toast.success('Arquivo excluído.')
     load()
   }
 
@@ -91,7 +91,7 @@ export default function FilesPanel({ patientId }) {
       </div>
       <div className="cbdy" style={{ padding: '4px 13px' }}>
         <p style={{ fontSize: 10.5, color: 'var(--txt3)', margin: '8px 0' }}>
-          PDF, imagens e Word, ate {MAX_MB}MB por arquivo. Armazenamento privado — acessivel apenas pela equipe clinica.
+          PDF, imagens e Word, até {MAX_MB}MB por arquivo. Armazenamento privado — acessível apenas pela equipe clínica.
         </p>
         {files.length ? files.map((f) => (
           <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid var(--bdr)' }}>

@@ -9,7 +9,7 @@ export const SITE = {
   therapistName: env.VITE_THERAPIST_NAME || '',
   city: env.VITE_CITY || '',
   church: env.VITE_CHURCH || '',
-  traditionLabel: env.VITE_TRADITION_LABEL || 'Terapia com base biblica',
+  traditionLabel: env.VITE_TRADITION_LABEL || 'Terapia com base bíblica',
   loginVerse: env.VITE_LOGIN_VERSE || '',
   heroPhoto: env.VITE_HERO_PHOTO || '/foto.jpg',
   themeColor: env.VITE_THEME_COLOR || '#1D9E75',

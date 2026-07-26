@@ -32,7 +32,7 @@ export default function OfflineBanner() {
         fontSize: 12, padding: '6px 12px',
       }}
     >
-      ⚠ Voce esta offline. O app continua aberto, mas pacientes, agenda e financeiro so atualizam quando a conexao voltar.
+      ⚠ Você está offline. O app continua aberto, mas pacientes, agenda e financeiro só atualizam quando a conexão voltar.
     </div>
   )
 }

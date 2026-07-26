@@ -17,8 +17,8 @@ import { listFactors } from '../lib/mfa'
 const STEPS = [
   { key: 'patient', required: true, ico: '👥', lbl: 'Cadastre seu primeiro paciente', to: '/patients' },
   { key: 'anamnese', required: true, ico: '📋', lbl: 'Envie um link de anamnese', to: '/anamnese' },
-  { key: 'session', required: true, ico: '📝', lbl: 'Registre sua primeira sessao', to: '/patients' },
-  { key: 'mfa', required: false, ico: '🔒', lbl: 'Ative a autenticacao de dois fatores (2FA)', to: '/config' },
+  { key: 'session', required: true, ico: '📝', lbl: 'Registre sua primeira sessão', to: '/patients' },
+  { key: 'mfa', required: false, ico: '🔒', lbl: 'Ative a autenticação de dois fatores (2FA)', to: '/config' },
   { key: 'calendar', required: false, ico: '📅', lbl: 'Conecte o Google Calendar', to: '/config' },
 ]
 

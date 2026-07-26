@@ -21,7 +21,7 @@ export default function PushNotificationsCard() {
     setBusy(true)
     try {
       await subscribeToPush(ownerId)
-      toast.success('Notificacoes ativadas neste dispositivo.')
+      toast.success('Notificações ativadas neste dispositivo.')
       refresh()
     } catch (e) { toast.error(e.message) }
     setBusy(false)
@@ -31,7 +31,7 @@ export default function PushNotificationsCard() {
     setBusy(true)
     try {
       await unsubscribeFromPush()
-      toast.success('Notificacoes desativadas neste dispositivo.')
+      toast.success('Notificações desativadas neste dispositivo.')
       refresh()
     } catch (e) { toast.error(e.message) }
     setBusy(false)
@@ -41,34 +41,34 @@ export default function PushNotificationsCard() {
     setBusy(true)
     try {
       const r = await sendTestPush()
-      if (r.sent > 0) toast.success('Notificacao de teste enviada — confira seu dispositivo.')
-      else toast.error('Nenhuma notificacao foi enviada. Confirme se ja ativou nesse dispositivo e se o VAPID esta configurado no servidor.')
+      if (r.sent > 0) toast.success('Notificação de teste enviada — confira seu dispositivo.')
+      else toast.error('Nenhuma notificação foi enviada. Confirme se já ativou nesse dispositivo e se o VAPID está configurado no servidor.')
     } catch (e) { toast.error(e.message) }
     setBusy(false)
   }
 
   return (
     <div className="card" style={{ marginBottom: 12 }}>
-      <div className="chdr">🔔 Notificacoes push neste dispositivo</div>
+      <div className="chdr">🔔 Notificações push neste dispositivo</div>
       <div className="cbdy">
         <p style={{ fontSize: 11.5, color: 'var(--txt2)', marginBottom: 10 }}>
-          Receba um aviso direto no celular/computador (mesmo com o app fechado) quando uma sessao estiver
-          chegando ou um alerta de risco for gerado. Precisa instalar o TerapiaViva na tela de inicio
-          primeiro (ver aviso de instalacao do app) — no iPhone, o push so funciona apos essa instalacao.
+          Receba um aviso direto no celular/computador (mesmo com o app fechado) quando uma sessão estiver
+          chegando ou um alerta de risco for gerado. Precisa instalar o TerapiaViva na tela de início
+          primeiro (ver aviso de instalação do app) — no iPhone, o push só funciona após essa instalação.
         </p>
 
         {status === 'checking' && <div style={{ fontSize: 12, color: 'var(--txt3)' }}>Verificando…</div>}
 
         {status === 'unsupported' && (
-          <div className="callout clwrn"><strong>Nao suportado</strong>Este navegador/dispositivo nao suporta notificacoes push.</div>
+          <div className="callout clwrn"><strong>Não suportado</strong>Este navegador/dispositivo não suporta notificações push.</div>
         )}
 
         {status === 'denied' && (
-          <div className="callout clwrn"><strong>Permissao bloqueada</strong>Voce negou a permissao de notificacao anteriormente. Libere em Configuracoes do navegador/sistema para ativar.</div>
+          <div className="callout clwrn"><strong>Permissão bloqueada</strong>Você negou a permissão de notificação anteriormente. Libere em Configurações do navegador/sistema para ativar.</div>
         )}
 
         {status === 'not-subscribed' && (
-          <button className="btn btn-p btn-sm" onClick={activate} disabled={busy}>{busy ? 'Ativando…' : '+ Ativar notificacoes'}</button>
+          <button className="btn btn-p btn-sm" onClick={activate} disabled={busy}>{busy ? 'Ativando…' : '+ Ativar notificações'}</button>
         )}
 
         {status === 'subscribed' && (

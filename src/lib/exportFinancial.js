@@ -14,7 +14,7 @@ function toCsv(header, rows) {
 }
 
 export function entriesToCsv(entries) {
-  const header = ['Data', 'Tipo', 'Categoria', 'Descricao', 'Valor', 'Status']
+  const header = ['Data', 'Tipo', 'Categoria', 'Descrição', 'Valor', 'Status']
   const rows = entries.map((e) => [
     e.entry_date,
     e.kind === 'receita' ? 'Receita' : 'Despesa',
@@ -27,7 +27,7 @@ export function entriesToCsv(entries) {
 }
 
 export function monthlySummaryToCsv(monthlySummary) {
-  const header = ['Mes', 'Receita (R$)', 'Despesa (R$)', 'Liquido (R$)']
+  const header = ['Mês', 'Receita (R$)', 'Despesa (R$)', 'Líquido (R$)']
   const rows = monthlySummary.map((m) => [
     m.label,
     m.revenue.toFixed(2).replace('.', ','),

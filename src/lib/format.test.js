@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { brl, monthLabel, initials, today, monthKey } from './format'
 
 describe('brl', () => {
-  it('formata numero como moeda brasileira', () => {
+  it('formata número como moeda brasileira', () => {
     expect(brl(1500.5)).toContain('1.500,50')
   })
   it('trata valores invalidos como zero', () => {
@@ -14,7 +14,7 @@ describe('brl', () => {
 
 describe('initials', () => {
   it('pega as duas primeiras iniciais do nome', () => {
-    expect(initials('Maria das Gracas Silva')).toBe('MD')
+    expect(initials('Maria das Graças Silva')).toBe('MD')
     expect(initials('Joao')).toBe('J')
   })
   it('retorna ?? para nome vazio', () => {
@@ -24,7 +24,7 @@ describe('initials', () => {
 })
 
 describe('monthLabel', () => {
-  it('retorna abreviacao do mes em pt-BR sem ponto', () => {
+  it('retorna abreviação do mês em pt-BR sem ponto', () => {
     const label = monthLabel('2026-01-15')
     expect(label).not.toContain('.')
     expect(label.length).toBeGreaterThan(0)

@@ -31,15 +31,15 @@ export const NAV = [
     ],
   },
   {
-    g: 'Clinico',
+    g: 'Clínico',
     items: [
-      { to: '/ia', ico: '🧠', lbl: 'IA Clinica', variant: 't', clinical: true },
-      { to: '/prayer', ico: '🙏', lbl: 'Oracao' },
-      { to: '/biblical', ico: '📖', lbl: 'Biblico' },
+      { to: '/ia', ico: '🧠', lbl: 'IA Clínica', variant: 't', clinical: true },
+      { to: '/prayer', ico: '🙏', lbl: 'Oração' },
+      { to: '/biblical', ico: '📖', lbl: 'Bíblico' },
     ],
   },
   {
-    g: 'Gestao',
+    g: 'Gestão',
     items: [
       { to: '/financial', ico: '💰', lbl: 'Financeiro', financial: true },
       { to: '/auditoria', ico: '🗂', lbl: 'Auditoria', adminOnly: true },

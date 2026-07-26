@@ -60,13 +60,13 @@ export default function Login() {
           </button>
         </form>
         <p style={{fontSize:11,color:'var(--txt2)',marginTop:14,textAlign:'center'}}>
-          {mode==='login' ? 'Nova terapeuta?' : 'Ja tem conta?'}{' '}
+          {mode==='login' ? 'Nova terapeuta?' : 'Já tem conta?'}{' '}
           <a onClick={()=>setMode(mode==='login'?'signup':'login')} style={{color:'var(--p)',cursor:'pointer',fontWeight:500}}>
-            {mode==='login' ? 'Criar conta gratis' : 'Fazer login'}
+            {mode==='login' ? 'Criar conta grátis' : 'Fazer login'}
           </a>
         </p>
         <p style={{fontSize:10,color:'var(--txt3)',marginTop:18,textAlign:'center'}}>
-          Ao continuar, voce concorda com os <a href="/termos.html" target="_blank" rel="noreferrer" style={{color:'var(--txt2)'}}>Termos de Uso</a> e a <a href="/privacidade.html" target="_blank" rel="noreferrer" style={{color:'var(--txt2)'}}>Politica de Privacidade</a>.
+          Ao continuar, você concorda com os <a href="/termos.html" target="_blank" rel="noreferrer" style={{color:'var(--txt2)'}}>Termos de Uso</a> e a <a href="/privacidade.html" target="_blank" rel="noreferrer" style={{color:'var(--txt2)'}}>Política de Privacidade</a>.
         </p>
       </div>
     </div>

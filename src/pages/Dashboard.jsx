@@ -48,7 +48,7 @@ export default function Dashboard() {
             border: '1px solid #f0b8b8', borderRadius: 10, padding: '11px 16px', marginBottom: 14, fontSize: 13,
           }}>
             <span style={{ fontSize: 18 }}>🚨</span>
-            <strong>{riskAlerts} alerta{riskAlerts > 1 ? 's' : ''} de risco nao resolvido{riskAlerts > 1 ? 's' : ''}</strong>
+            <strong>{riskAlerts} alerta{riskAlerts > 1 ? 's' : ''} de risco não resolvido{riskAlerts > 1 ? 's' : ''}</strong>
             <span style={{ marginLeft: 'auto', fontSize: 12, textDecoration: 'underline' }}>Ver alertas →</span>
           </div>
         </Link>
@@ -58,13 +58,13 @@ export default function Dashboard() {
         <div className="hero-txt">
           <h1>Bom dia, {first} 🌿</h1>
           <p>
-            Voce tem <strong style={{color:'#9FE1CB'}}>{hasToday} sessao(oes) hoje</strong>
+            Você tem <strong style={{color:'#9FE1CB'}}>{hasToday} sessão(ões) hoje</strong>
             {hasPending ? <> e <strong style={{color:'#FAC775'}}>{kpis.pending_anamneses} anamnese(s) pendente(s)</strong></> : null}.
           </p>
           <div className="hero-verse">"{VERSE.t}" — {VERSE.r}</div>
         </div>
         <div className="hero-photo">
-          <img src={SITE.heroPhoto} alt="Sessao terapeutica" loading="lazy" />
+          <img src={SITE.heroPhoto} alt="Sessão terapêutica" loading="lazy" />
           <div className="hero-photo-ov"></div>
           <div className="hero-lbl">{therapist?.city || SITE.city || '—'} · {dayStr}</div>
         </div>
@@ -77,7 +77,7 @@ export default function Dashboard() {
           <div className="ss">Acompanhamento regular</div>
         </div>
         <div className="sc">
-          <div className="sl">Sessoes hoje</div>
+          <div className="sl">Sessões hoje</div>
           <div className="sv" style={{color:'var(--t)'}}>{kpis.today_appointments ?? 0}</div>
           <div className="ss">{todayAppts.filter(a=>a.mode==='presencial').length} presenciais · {todayAppts.filter(a=>a.mode==='online').length} online</div>
         </div>
@@ -113,10 +113,10 @@ export default function Dashboard() {
             <div className="chdr">🧠 Insights da IA</div>
             <div className="cbdy" style={{padding:'4px 13px'}}>
               {[
-                {i:'⚠️', t:'Verifique pacientes de risco moderado/alto — sugerimos revisar metas terapeuticas.'},
-                {i:'📈', t:'Pacientes com anamnese completa progridem 40% mais rapido nas primeiras 4 sessoes.'},
+                {i:'⚠️', t:'Verifique pacientes de risco moderado/alto — sugerimos revisar metas terapêuticas.'},
+                {i:'📈', t:'Pacientes com anamnese completa progridem 40% mais rápido nas primeiras 4 sessões.'},
                 {i:'🔄', t:'Faltas seguidas indicam ansiedade evitativa — considere contato proativo.'},
-                {i:'💡', t:'Analise IA das ultimas sessoes revela padroes de tema para grupos de apoio.'},
+                {i:'💡', t:'Análise IA das últimas sessões revela padrões de tema para grupos de apoio.'},
               ].map((a,i)=>(
                 <div className="aii" key={i}>
                   <div className="aiico">{a.i}</div>
@@ -137,7 +137,7 @@ export default function Dashboard() {
                     <div className="pavt" style={{background:p.avatar_bg, color:p.avatar_fg}}>{p.initials}</div>
                     <div className="pinf">
                       <div className="pnm">{p.full_name}</div>
-                      <div className="psub">{p.next_appointment_at ? new Date(p.next_appointment_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'Sem proxima sessao'}</div>
+                      <div className="psub">{p.next_appointment_at ? new Date(p.next_appointment_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'Sem próxima sessão'}</div>
                     </div>
                     <span className={`rpill r${p.risk[0]}`}>{p.risk}</span>
                     <span style={{fontSize:11,color:'var(--txt3)',marginLeft:4}}>›</span>
@@ -148,14 +148,14 @@ export default function Dashboard() {
           </div>
 
           <div className="card">
-            <div className="chdr">🙏 Oracao intercessoria<div className="chdr-act"><Link to="/prayer"><button>Abrir</button></Link></div></div>
+            <div className="chdr">🙏 Oração intercessória<div className="chdr-act"><Link to="/prayer"><button>Abrir</button></Link></div></div>
             <div className="cbdy" style={{padding:'4px 13px'}}>
               {patients.slice(0,3).map((p) => (
                 <div key={p.id} style={{display:'flex',gap:8,padding:'6px 0',borderBottom:'1px solid var(--bdr)',alignItems:'flex-start'}}>
                   <input type="checkbox" style={{accentColor:'var(--p)',marginTop:2}} />
                   <div>
                     <div style={{fontSize:12,fontWeight:500}}>{p.full_name}</div>
-                    <div style={{fontSize:10,color:'var(--txt2)'}}>{p.goals?.[0] || 'Cuidado terapeutico'}</div>
+                    <div style={{fontSize:10,color:'var(--txt2)'}}>{p.goals?.[0] || 'Cuidado terapêutico'}</div>
                   </div>
                 </div>
               ))}

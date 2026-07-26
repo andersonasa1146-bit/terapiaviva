@@ -15,7 +15,7 @@ export default class ErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     // eslint-disable-next-line no-console
-    console.error('[TerapiaViva] Erro nao tratado:', error, info)
+    console.error('[TerapiaViva] Erro não tratado:', error, info)
     // Task #32: envia para o Sentry quando VITE_SENTRY_DSN estiver
     // configurada; sem isso, e um no-op silencioso.
     captureException(error, { componentStack: info?.componentStack })
@@ -35,8 +35,8 @@ export default class ErrorBoundary extends Component {
             <div style={{ fontSize: 32, marginBottom: 10 }}>⚠️</div>
             <h2 style={{ fontSize: 16, marginBottom: 8 }}>Algo deu errado</h2>
             <p style={{ fontSize: 13, color: '#556866', marginBottom: 18, lineHeight: 1.6 }}>
-              A tela encontrou um erro inesperado. Seus dados ja salvos nao foram perdidos.
-              Tente recarregar a pagina; se o problema continuar, contate o suporte.
+              A tela encontrou um erro inesperado. Seus dados já salvos não foram perdidos.
+              Tente recarregar a página; se o problema continuar, contate o suporte.
             </p>
             <button
               onClick={() => { this.setState({ error: null }); window.location.reload() }}

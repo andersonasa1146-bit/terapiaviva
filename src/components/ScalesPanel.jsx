@@ -43,7 +43,7 @@ export default function ScalesPanel({ patientId }) {
     if (error) { toast.error(error.message); return }
     if (riskFlag) {
       await confirm(
-        'Atencao: a resposta ao item sobre pensamentos de morte/autolesao foi maior que zero. Considere avaliacao de risco imediata e, se necessario, oriente CVV 188 / SAMU 192.',
+        'Atenção: a resposta ao item sobre pensamentos de morte/autolesão foi maior que zero. Considere avaliação de risco imediata e, se necessário, oriente CVV 188 / SAMU 192.',
         { confirmLabel: 'Entendi', cancelLabel: 'Fechar' }
       )
     }
@@ -99,7 +99,7 @@ export default function ScalesPanel({ patientId }) {
     <div>
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="chdr">
-          <span>📊 Escalas clinicas padronizadas</span>
+          <span>📊 Escalas clínicas padronizadas</span>
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="btn btn-sm btn-p" onClick={() => startApply('phq9')}>+ Aplicar PHQ-9</button>
             <button className="btn btn-sm btn-p" onClick={() => startApply('gad7')}>+ Aplicar GAD-7</button>
@@ -114,20 +114,20 @@ export default function ScalesPanel({ patientId }) {
                 <YAxis tick={{ fontSize: 11, fill: '#556866' }} domain={[0, 27]} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="phq9" name="PHQ-9 (depressao)" stroke="#1D9E75" strokeWidth={2} connectNulls />
+                <Line type="monotone" dataKey="phq9" name="PHQ-9 (depressão)" stroke="#1D9E75" strokeWidth={2} connectNulls />
                 <Line type="monotone" dataKey="gad7" name="GAD-7 (ansiedade)" stroke="#534AB7" strokeWidth={2} connectNulls />
               </LineChart>
             </ResponsiveContainer>
           ) : (
             <div style={{ padding: '18px 0', textAlign: 'center', fontSize: 12, color: 'var(--txt3)' }}>
-              Nenhuma escala aplicada ainda. Use os botoes acima para comecar o acompanhamento.
+              Nenhuma escala aplicada ainda. Use os botões acima para começar o acompanhamento.
             </div>
           )}
         </div>
       </div>
 
       <div className="card">
-        <div className="chdr">Historico de aplicacoes</div>
+        <div className="chdr">Histórico de aplicações</div>
         <div className="cbdy" style={{ padding: '4px 13px' }}>
           {history.length ? [...history].reverse().map((h) => (
             <div key={h.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid var(--bdr)' }}>

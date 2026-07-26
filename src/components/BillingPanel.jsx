@@ -41,16 +41,16 @@ export default function BillingPanel({ patientId }) {
     e.preventDefault()
     const amount = Number(form.amount)
     if (!amount || amount <= 0) { toast.error('Informe um valor valido.'); return }
-    if (!form.description.trim()) { toast.error('Informe uma descricao para a cobranca.'); return }
+    if (!form.description.trim()) { toast.error('Informe uma descrição para a cobrança.'); return }
     setCreating(true)
     try {
       const r = await chargePatient(patientId, amount, form.description.trim())
       setForm({ amount: '', description: '' })
       await load()
       if (r.payment_link) {
-        await promptCopy('Cobranca criada! Envie este link de pagamento ao paciente:', r.payment_link)
+        await promptCopy('Cobrança criada! Envie este link de pagamento ao paciente:', r.payment_link)
       } else {
-        toast.success('Cobranca criada.')
+        toast.success('Cobrança criada.')
       }
     } catch (err) {
       toast.error(err.message)
@@ -60,17 +60,17 @@ export default function BillingPanel({ patientId }) {
 
   const copyLink = (c) => {
     if (!c.payment_link) return
-    promptCopy('Link de pagamento desta cobranca:', c.payment_link)
+    promptCopy('Link de pagamento desta cobrança:', c.payment_link)
   }
 
   return (
     <div className="card" style={{ marginBottom: 12 }}>
-      <div className="chdr">💵 Cobranca de pacientes ({charges.length})</div>
+      <div className="chdr">💵 Cobrança de pacientes ({charges.length})</div>
       <div className="cbdy" style={{ padding: '10px 13px' }}>
         {tokenReady === false && (
           <div className="callout clwrn" style={{ marginBottom: 10 }}>
             <strong>Configure seu token do Mercado Pago</strong>
-            Para gerar cobrancas, va em <Link to="/config">Configuracoes → Cobranca de pacientes</Link> e
+            Para gerar cobranças, vá em <Link to="/config">Configurações → Cobrança de pacientes</Link> e
             cole seu Access Token pessoal do Mercado Pago.
           </div>
         )}
@@ -82,12 +82,12 @@ export default function BillingPanel({ patientId }) {
               onChange={e => setForm({ ...form, amount: e.target.value })} placeholder="150.00" />
           </div>
           <div className="field" style={{ flex: 1, minWidth: 160, margin: 0 }}>
-            <label>Descricao</label>
+            <label>Descrição</label>
             <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-              placeholder="Sessao de 04/07, pacote mensal..." />
+              placeholder="Sessão de 04/07, pacote mensal..." />
           </div>
           <button className="btn btn-p btn-sm" type="submit" disabled={creating || tokenReady === false}>
-            {creating ? 'Gerando…' : '+ Nova cobranca'}
+            {creating ? 'Gerando…' : '+ Nova cobrança'}
           </button>
         </form>
 
@@ -111,7 +111,7 @@ export default function BillingPanel({ patientId }) {
             </div>
           )
         }) : (
-          <div style={{ padding: '14px 0', textAlign: 'center', fontSize: 12, color: 'var(--txt3)' }}>Nenhuma cobranca gerada ainda.</div>
+          <div style={{ padding: '14px 0', textAlign: 'center', fontSize: 12, color: 'var(--txt3)' }}>Nenhuma cobrança gerada ainda.</div>
         )}
       </div>
     </div>

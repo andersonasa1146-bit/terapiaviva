@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 async function callFunction(name, payload) {
   const { data: sess } = await supabase.auth.getSession()
   const token = sess?.session?.access_token
-  if (!token) throw new Error('Voce precisa estar autenticada.')
+  if (!token) throw new Error('Você precisa estar autenticada.')
 
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${name}`
   const res = await fetch(url, {
@@ -33,7 +33,7 @@ export async function syncAppointmentToGoogle(appointmentId, action = 'upsert') 
   try {
     return await callFunction('sync-appointment', { appointment_id: appointmentId, action })
   } catch (e) {
-    console.warn('Sincronizacao com Google Calendar falhou (nao bloqueante):', e.message)
+    console.warn('Sincronização com Google Calendar falhou (não bloqueante):', e.message)
     return { skipped: true, error: e.message }
   }
 }

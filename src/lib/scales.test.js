@@ -1,16 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import { SCALES, SCALE_OPTIONS, scoreScale } from './scales'
 
-describe('definicoes das escalas', () => {
-  it('PHQ-9 tem 9 perguntas e score maximo 27', () => {
+describe('definições das escalas', () => {
+  it('PHQ-9 tem 9 perguntas e score máximo 27', () => {
     expect(SCALES.phq9.questions).toHaveLength(9)
     expect(SCALES.phq9.maxScore).toBe(27)
   })
-  it('GAD-7 tem 7 perguntas e score maximo 21', () => {
+  it('GAD-7 tem 7 perguntas e score máximo 21', () => {
     expect(SCALES.gad7.questions).toHaveLength(7)
     expect(SCALES.gad7.maxScore).toBe(21)
   })
-  it('opcoes de resposta vao de 0 a 3', () => {
+  it('opções de resposta vão de 0 a 3', () => {
     expect(SCALE_OPTIONS.map((o) => o.v)).toEqual([0, 1, 2, 3])
   })
 })
@@ -34,7 +34,7 @@ describe('scoreScale — PHQ-9', () => {
     expect(sev(20)).toBe('Severa')
     expect(sev(27)).toBe('Severa')
   })
-  it('sinaliza risco quando o item 9 (ideacao) e maior que zero', () => {
+  it('sinaliza risco quando o item 9 (ideação) é maior que zero', () => {
     const answers = [0, 0, 0, 0, 0, 0, 0, 0, 1]
     expect(scoreScale('phq9', answers).riskFlag).toBe(true)
   })
@@ -53,7 +53,7 @@ describe('scoreScale — GAD-7', () => {
     expect(sev(15)).toBe('Severa')
     expect(sev(21)).toBe('Severa')
   })
-  it('nunca sinaliza risco (nao tem item de ideacao)', () => {
+  it('nunca sinaliza risco (não tem item de ideação)', () => {
     expect(scoreScale('gad7', [3, 3, 3, 3, 3, 3, 3]).riskFlag).toBe(false)
   })
 })

@@ -3,24 +3,24 @@
 
 export const SCALE_OPTIONS = [
   { v: 0, l: 'Nunca' },
-  { v: 1, l: 'Varios dias' },
+  { v: 1, l: 'Vários dias' },
   { v: 2, l: 'Mais da metade dos dias' },
   { v: 3, l: 'Quase todos os dias' },
 ]
 
 export const SCALES = {
   phq9: {
-    label: 'PHQ-9 (Depressao)',
-    intro: 'Nas ultimas 2 semanas, com que frequencia voce foi incomodado(a) por algum dos problemas abaixo?',
+    label: 'PHQ-9 (Depressão)',
+    intro: 'Nas últimas 2 semanas, com que frequência você foi incomodado(a) por algum dos problemas abaixo?',
     maxScore: 27,
     riskItemIndex: 8, // "pensamentos de morte/se machucar" — atenção especial se > 0
     questions: [
       'Pouco interesse ou prazer em fazer as coisas',
-      'Sentir-se pra baixo, deprimido(a) ou sem esperanca',
+      'Sentir-se pra baixo, deprimido(a) ou sem esperança',
       'Dificuldade para pegar no sono, continuar dormindo ou dormir demais',
       'Sentir-se cansado(a) ou com pouca energia',
       'Falta de apetite ou comer demais',
-      'Sentir-se mal consigo mesmo(a) — ou achar que e um fracasso ou que decepcionou sua familia ou a si mesmo(a)',
+      'Sentir-se mal consigo mesmo(a) — ou achar que é um fracasso ou que decepcionou sua família ou a si mesmo(a)',
       'Dificuldade para se concentrar, como ler ou assistir TV',
       'Lentidao para se movimentar ou falar (percebida por outros); ou o contrario, muita inquietacao',
       'Pensamentos de que seria melhor estar morto(a) ou de se machucar de alguma forma',
@@ -35,15 +35,15 @@ export const SCALES = {
   },
   gad7: {
     label: 'GAD-7 (Ansiedade)',
-    intro: 'Nas ultimas 2 semanas, com que frequencia voce foi incomodado(a) por algum dos problemas abaixo?',
+    intro: 'Nas últimas 2 semanas, com que frequência você foi incomodado(a) por algum dos problemas abaixo?',
     maxScore: 21,
     riskItemIndex: null,
     questions: [
       'Sentir-se nervoso(a), ansioso(a) ou muito tenso(a)',
-      'Nao ser capaz de impedir ou controlar as preocupacoes',
+      'Não ser capaz de impedir ou controlar as preocupações',
       'Preocupar-se muito com diversas coisas',
       'Dificuldade para relaxar',
-      'Ficar tao agitado(a) que se torna dificil permanecer parado(a)',
+      'Ficar tão agitado(a) que se torna difícil permanecer parado(a)',
       'Ficar facilmente aborrecido(a) ou irritado(a)',
       'Sentir medo como se algo terrivel fosse acontecer',
     ],

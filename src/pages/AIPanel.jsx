@@ -15,8 +15,8 @@ export default function AIPanel() {
   return (
     <div style={{padding:14}}>
       <div style={{marginBottom:12}}>
-        <h2 style={{fontSize:15,fontWeight:600}}>🧠 IA Clinica por Paciente</h2>
-        <p style={{fontSize:11,color:'var(--txt2)'}}>Abra um prontuario para registrar e analisar sessoes com IA (chave protegida no servidor).</p>
+        <h2 style={{fontSize:15,fontWeight:600}}>🧠 IA Clínica por Paciente</h2>
+        <p style={{fontSize:11,color:'var(--txt2)'}}>Abra um prontuário para registrar e analisar sessões com IA (chave protegida no servidor).</p>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         {list.map(p => (
@@ -30,7 +30,7 @@ export default function AIPanel() {
                 <span className={`rpill r${p.risk[0]}`}>{p.risk}</span>
               </div>
               <div className="cbdy" style={{fontSize:11,color:'var(--txt2)'}}>
-                {p.sessions?.[0]?.count ?? 0} sessao(oes) · Abrir prontuario ›
+                {p.sessions?.[0]?.count ?? 0} sessão(ões) · Abrir prontuário ›
               </div>
             </div>
           </Link>

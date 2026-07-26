@@ -28,7 +28,7 @@ export default function AuditLog() {
     return (
       <div style={{ padding: 14 }}>
         <div className="card"><div className="cbdy" style={{ padding: '22px 16px', textAlign: 'center', fontSize: 12.5, color: 'var(--txt2)' }}>
-          Somente a proprietaria ou administradores da clinica podem ver o log de auditoria.
+          Somente a proprietária ou administradores da clínica podem ver o log de auditoria.
         </div></div>
       </div>
     )
@@ -39,7 +39,7 @@ export default function AuditLog() {
       <div style={{ marginBottom: 12 }}>
         <h2 style={{ fontSize: 15, fontWeight: 600 }}>🗂 Log de auditoria de acesso</h2>
         <p style={{ fontSize: 11, color: 'var(--txt2)' }}>
-          Registro de quem acessou o prontuario de cada paciente e quando — util para atender a LGPD art. 37
+          Registro de quem acessou o prontuário de cada paciente e quando — útil para atender a LGPD art. 37
           (registro das operacoes de tratamento) e para investigar acessos indevidos.
         </p>
       </div>

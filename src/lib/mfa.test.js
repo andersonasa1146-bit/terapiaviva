@@ -19,7 +19,7 @@ describe('listFactors', () => {
     mfaApi.listFactors.mockResolvedValue({ data: { totp: [{ id: 'f1' }] }, error: null })
     await expect(listFactors()).resolves.toEqual([{ id: 'f1' }])
   })
-  it('retorna lista vazia quando nao ha fatores', async () => {
+  it('retorna lista vazia quando não há fatores', async () => {
     mfaApi.listFactors.mockResolvedValue({ data: {}, error: null })
     await expect(listFactors()).resolves.toEqual([])
   })
@@ -30,7 +30,7 @@ describe('listFactors', () => {
 })
 
 describe('verifyEnrollment', () => {
-  it('cria challenge e verifica o codigo na sequencia', async () => {
+  it('cria challenge e verifica o código na sequência', async () => {
     mfaApi.challenge.mockResolvedValue({ data: { id: 'ch1' }, error: null })
     mfaApi.verify.mockResolvedValue({ error: null })
     await verifyEnrollment('f1', '123456')
@@ -41,12 +41,12 @@ describe('verifyEnrollment', () => {
       code: '123456',
     })
   })
-  it('interrompe se o challenge falhar (verify nao e chamado)', async () => {
+  it('interrompe se o challenge falhar (verify não é chamado)', async () => {
     mfaApi.challenge.mockResolvedValue({ data: null, error: new Error('challenge falhou') })
     await expect(verifyEnrollment('f1', '000000')).rejects.toThrow('challenge falhou')
     expect(mfaApi.verify).not.toHaveBeenCalled()
   })
-  it('propaga codigo TOTP invalido', async () => {
+  it('propaga código TOTP inválido', async () => {
     mfaApi.challenge.mockResolvedValue({ data: { id: 'ch1' }, error: null })
     mfaApi.verify.mockResolvedValue({ error: new Error('Invalid TOTP code') })
     await expect(verifyEnrollment('f1', '999999')).rejects.toThrow('Invalid TOTP code')
@@ -54,7 +54,7 @@ describe('verifyEnrollment', () => {
 })
 
 describe('challengeAndVerify / getAssuranceLevel', () => {
-  it('eleva a sessao apos codigo correto', async () => {
+  it('eleva a sessão após código correto', async () => {
     mfaApi.challenge.mockResolvedValue({ data: { id: 'ch2' }, error: null })
     mfaApi.verify.mockResolvedValue({ error: null })
     await challengeAndVerify('f1', '654321')
@@ -64,7 +64,7 @@ describe('challengeAndVerify / getAssuranceLevel', () => {
       code: '654321',
     })
   })
-  it('expoe o nivel de garantia atual', async () => {
+  it('expõe o nível de garantia atual', async () => {
     mfaApi.getAuthenticatorAssuranceLevel.mockResolvedValue({
       data: { currentLevel: 'aal1', nextLevel: 'aal2' },
       error: null,

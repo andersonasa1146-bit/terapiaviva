@@ -9,8 +9,8 @@ import { listTeamMembers, inviteTeamMember, removeTeamMember, updateTeamMemberRo
 import TwoFactorCard from '../components/TwoFactorCard'
 import PushNotificationsCard from '../components/PushNotificationsCard'
 
-const PLAN_LABEL = { trial: 'Periodo de teste', basico: 'Basico', profissional: 'Profissional', cancelado: 'Cancelado' }
-const TEAM_ROLE_LABEL = { owner: 'Proprietaria(o) da conta', admin: 'Administrador(a)', terapeuta: 'Terapeuta', recepcao: 'Recepcao' }
+const PLAN_LABEL = { trial: 'Período de teste', basico: 'Básico', profissional: 'Profissional', cancelado: 'Cancelado' }
+const TEAM_ROLE_LABEL = { owner: 'Proprietária(o) da conta', admin: 'Administrador(a)', terapeuta: 'Terapeuta', recepcao: 'Recepção' }
 const WEEKDAYS = [['mon','Seg'],['tue','Ter'],['wed','Qua'],['thu','Qui'],['fri','Sex'],['sat','Sab'],['sun','Dom']]
 const DEFAULT_HOURS = { mon:[['08:00','18:00']], tue:[['08:00','18:00']], wed:[['08:00','18:00']], thu:[['08:00','18:00']], fri:[['08:00','18:00']], sat:[], sun:[] }
 
@@ -109,7 +109,7 @@ export default function Config() {
   const saveHours = async () => {
     const { error } = await supabase.from('therapists').update({ working_hours: toJsonb(hours) }).eq('id', session.user.id)
     if (error) toast.error(error.message)
-    else toast.success('Horario de expediente atualizado.')
+    else toast.success('Horário de expediente atualizado.')
   }
 
   const subscribe = async () => {
@@ -150,13 +150,13 @@ export default function Config() {
       await setPatientMpToken(mpTokenInput.trim())
       setMpTokenInput('')
       setMpConnected(true)
-      toast.success('Token salvo. Voce ja pode cobrar seus pacientes.')
+      toast.success('Token salvo. Você já pode cobrar seus pacientes.')
     } catch (e) { toast.error(e.message) }
     setMpBusy(false)
   }
 
   const removeMpToken = async () => {
-    const ok = await confirm('Remover seu token pessoal do Mercado Pago? Voce nao podera mais gerar cobrancas para pacientes ate configurar novamente.', { confirmLabel: 'Remover' })
+    const ok = await confirm('Remover seu token pessoal do Mercado Pago? Você não poderá mais gerar cobranças para pacientes até configurar novamente.', { confirmLabel: 'Remover' })
     if (!ok) return
     try {
       await clearPatientMpToken()
@@ -193,7 +193,7 @@ export default function Config() {
   }
 
   const remove = async (m) => {
-    const ok = await confirm(`Remover ${m.invited_email} da equipe? A pessoa perdera acesso aos dados da clinica imediatamente.`, { danger: true, confirmLabel: 'Remover' })
+    const ok = await confirm(`Remover ${m.invited_email} da equipe? A pessoa perderá acesso aos dados da clínica imediatamente.`, { danger: true, confirmLabel: 'Remover' })
     if (!ok) return
     try {
       await removeTeamMember(m.id)
@@ -210,15 +210,15 @@ export default function Config() {
 
   return (
     <div style={{padding:14}}>
-      <div style={{marginBottom:12}}><h2 style={{fontSize:15,fontWeight:600}}>⚙️ Configuracoes</h2></div>
+      <div style={{marginBottom:12}}><h2 style={{fontSize:15,fontWeight:600}}>⚙️ Configurações</h2></div>
 
       {!isOwner && (
         <div className="card" style={{marginBottom:12}}>
           <div className="cbdy" style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
             <div style={{fontSize:12.5,color:'var(--txt2)'}}>
-              Voce esta operando na equipe desta clinica como <strong>{TEAM_ROLE_LABEL[teamRole] || teamRole}</strong>.
-              Configuracoes de plano, cobranca, Google Calendar e horario de expediente sao gerenciadas pela
-              proprietaria da conta.
+              Você está operando na equipe desta clínica como <strong>{TEAM_ROLE_LABEL[teamRole] || teamRole}</strong>.
+              Configurações de plano, cobrança, Google Calendar e horário de expediente são gerenciadas pela
+              proprietária da conta.
             </div>
           </div>
         </div>
@@ -231,7 +231,7 @@ export default function Config() {
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
               <div>
                 <div style={{fontSize:13,fontWeight:600}}>{PLAN_LABEL[plan] || plan}</div>
-                <div style={{fontSize:11,color:'var(--txt2)'}}>{used} de {limit} analises de IA usadas este mes (compartilhado por toda a equipe)</div>
+                <div style={{fontSize:11,color:'var(--txt2)'}}>{used} de {limit} análises de IA usadas este mês (compartilhado por toda a equipe)</div>
               </div>
               {plan !== 'profissional' && (
                 <button className="btn btn-p btn-sm" onClick={subscribe} disabled={subBusy}>
@@ -247,15 +247,15 @@ export default function Config() {
       )}
 
       <div className="card" style={{marginBottom:12}}>
-        <div className="chdr">👥 Equipe da clinica</div>
+        <div className="chdr">👥 Equipe da clínica</div>
         <div className="cbdy">
           {!isOwner ? (
-            <p style={{fontSize:12,color:'var(--txt2)'}}>Somente a proprietaria da conta pode convidar ou remover membros da equipe.</p>
+            <p style={{fontSize:12,color:'var(--txt2)'}}>Somente a proprietária da conta pode convidar ou remover membros da equipe.</p>
           ) : (
             <>
               <p style={{fontSize:11.5,color:'var(--txt2)',marginBottom:10}}>
-                Convide colegas (terapeutas associadas, recepcao) para operar nos mesmos pacientes, agenda e
-                (opcionalmente) financeiro, cada uma com seu proprio login e nivel de acesso.
+                Convide colegas (terapeutas associadas, recepção) para operar nos mesmos pacientes, agenda e
+                (opcionalmente) financeiro, cada uma com seu próprio login e nível de acesso.
               </p>
               <form onSubmit={sendInvite} style={{display:'flex',gap:8,marginBottom:14,flexWrap:'wrap'}}>
                 <input type="email" placeholder="email@exemplo.com" value={inviteForm.email}
@@ -263,7 +263,7 @@ export default function Config() {
                 <select value={inviteForm.role} onChange={e=>setInviteForm({...inviteForm, role:e.target.value})}>
                   <option value="admin">Administrador(a)</option>
                   <option value="terapeuta">Terapeuta</option>
-                  <option value="recepcao">Recepcao</option>
+                  <option value="recepcao">Recepção</option>
                 </select>
                 <button className="btn btn-p btn-sm" type="submit" disabled={inviting}>{inviting?'Convidando…':'+ Convidar'}</button>
               </form>
@@ -278,7 +278,7 @@ export default function Config() {
               ) : team.length ? team.map(m => (
                 <div key={m.id} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 0',borderBottom:'1px solid var(--bdr)'}}>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:12.5,fontWeight:500}}>{m.invited_email}{m.is_me ? ' (voce)' : ''}</div>
+                    <div style={{fontSize:12.5,fontWeight:500}}>{m.invited_email}{m.is_me ? ' (você)' : ''}</div>
                     <div style={{fontSize:10.5,color:'var(--txt2)'}}>
                       {m.status === 'pendente' ? 'Convite pendente' : 'Ativo'} · desde {new Date(m.invited_at).toLocaleDateString('pt-BR')}
                     </div>
@@ -286,7 +286,7 @@ export default function Config() {
                   <select value={m.role} onChange={e=>changeRole(m, e.target.value)} style={{fontSize:11.5,padding:'4px 6px'}}>
                     <option value="admin">Administrador(a)</option>
                     <option value="terapeuta">Terapeuta</option>
-                    <option value="recepcao">Recepcao</option>
+                    <option value="recepcao">Recepção</option>
                   </select>
                   {m.status === 'pendente' && <button className="btn btn-sm" onClick={()=>copyInviteLink(m)}>🔗 Link</button>}
                   <button className="btn btn-sm" style={{color:'var(--red)'}} onClick={()=>remove(m)}>Remover</button>
@@ -299,12 +299,12 @@ export default function Config() {
 
       {isOwner && (
         <div className="card" style={{marginBottom:12}}>
-          <div className="chdr">💵 Cobranca de pacientes (Mercado Pago pessoal)</div>
+          <div className="chdr">💵 Cobrança de pacientes (Mercado Pago pessoal)</div>
           <div className="cbdy">
             <p style={{fontSize:11.5,color:'var(--txt2)',marginBottom:10}}>
-              Diferente da assinatura acima (que paga o uso do TerapiaViva), aqui voce conecta a <strong>sua propria
-              conta</strong> do Mercado Pago para cobrar sessoes e pacotes diretamente dos seus pacientes — o dinheiro
-              cai na sua conta, nao na nossa. Gere o Access Token em Mercado Pago → Suas integracoes → Credenciais de producao.
+              Diferente da assinatura acima (que paga o uso do TerapiaViva), aqui você conecta a <strong>sua própria
+              conta</strong> do Mercado Pago para cobrar sessões e pacotes diretamente dos seus pacientes — o dinheiro
+              cai na sua conta, não na nossa. Gere o Access Token em Mercado Pago → Suas integrações → Credenciais de produção.
             </p>
             {mpConnected ? (
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -313,7 +313,7 @@ export default function Config() {
               </div>
             ) : (
               <div style={{display:'flex',gap:8}}>
-                <input type="password" placeholder="APP_USR-... (Access Token de producao)" value={mpTokenInput}
+                <input type="password" placeholder="APP_USR-... (Access Token de produção)" value={mpTokenInput}
                   onChange={e=>setMpTokenInput(e.target.value)} style={{flex:1}} />
                 <button className="btn btn-p btn-sm" onClick={saveMpToken} disabled={mpBusy}>{mpBusy?'Salvando…':'Salvar token'}</button>
               </div>
@@ -328,10 +328,10 @@ export default function Config() {
           <div className="cbdy">
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
               <div>
-                <div style={{fontSize:13,fontWeight:600}}>{googleConnected ? '✅ Conectado' : 'Nao conectado'}</div>
+                <div style={{fontSize:13,fontWeight:600}}>{googleConnected ? '✅ Conectado' : 'Não conectado'}</div>
                 <div style={{fontSize:11,color:'var(--txt2)'}}>
                   {googleConnected
-                    ? 'Novos agendamentos sao espelhados automaticamente na sua agenda do Google.'
+                    ? 'Novos agendamentos são espelhados automaticamente na sua agenda do Google.'
                     : 'Conecte para sincronizar automaticamente os agendamentos do TerapiaViva com seu Google Calendar.'}
                 </div>
               </div>
@@ -349,11 +349,11 @@ export default function Config() {
 
       {isOwner && (
         <div className="card" style={{marginBottom:12}}>
-          <div className="chdr">🗓️ Horario de expediente e conflitos<div className="chdr-act"><button className="btn btn-sm btn-p" onClick={saveHours}>Salvar</button></div></div>
+          <div className="chdr">🗓️ Horário de expediente e conflitos<div className="chdr-act"><button className="btn btn-sm btn-p" onClick={saveHours}>Salvar</button></div></div>
           <div className="cbdy">
             <p style={{fontSize:11.5,color:'var(--txt2)',marginBottom:10}}>
               Usado para avisar (sem bloquear) quando um agendamento cai fora do seu expediente. Agendamentos
-              que se sobrepoem no mesmo horario sao sempre impedidos automaticamente, para evitar conflito de agenda.
+              que se sobrepõem no mesmo horário são sempre impedidos automaticamente, para evitar conflito de agenda.
             </p>
             {WEEKDAYS.map(([k,label]) => (
               <div key={k} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 0',borderBottom:'1px solid var(--bdr)'}}>
@@ -364,7 +364,7 @@ export default function Config() {
                 {hours[k]?.enabled ? (
                   <>
                     <input type="time" value={hours[k].from} onChange={e=>updateHoursRow(k,{from:e.target.value})} style={{fontSize:12,padding:'4px 6px'}} />
-                    <span style={{fontSize:11,color:'var(--txt3)'}}>ate</span>
+                    <span style={{fontSize:11,color:'var(--txt3)'}}>até</span>
                     <input type="time" value={hours[k].to} onChange={e=>updateHoursRow(k,{to:e.target.value})} style={{fontSize:12,padding:'4px 6px'}} />
                   </>
                 ) : <span style={{fontSize:11,color:'var(--txt3)'}}>Sem atendimento</span>}
@@ -376,10 +376,10 @@ export default function Config() {
 
       {isOwner && (
         <div className="card" style={{marginBottom:12}}>
-          <div className="chdr">🔔 Lembretes automaticos de sessao</div>
+          <div className="chdr">🔔 Lembretes automáticos de sessão</div>
           <div className="cbdy">
             <p style={{fontSize:11.5,color:'var(--txt2)',marginBottom:10}}>
-              Envia um lembrete automatico ao paciente antes da sessao agendada (requer e-mail/telefone
+              Envia um lembrete automático ao paciente antes da sessão agendada (requer e-mail/telefone
               cadastrados no paciente e os provedores configurados pelo administrador — Resend para
               e-mail, Z-API para WhatsApp).
             </p>
@@ -421,7 +421,7 @@ export default function Config() {
               <div className="field"><label>Igreja</label><input value={form.church} onChange={e=>setForm({...form,church:e.target.value})} /></div>
               <div className="field"><label>Registro profissional (CRP/opcional)</label><input value={form.crp} onChange={e=>setForm({...form,crp:e.target.value})} /></div>
             </div>
-            <div className="field"><label>Bio (aparece em relatorios e portal)</label><textarea rows={2} value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})} /></div>
+            <div className="field"><label>Bio (aparece em relatórios e portal)</label><textarea rows={2} value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})} /></div>
             <button className="btn btn-p" type="submit">Salvar perfil</button>
           </form>
         </div>
@@ -432,28 +432,28 @@ export default function Config() {
       <PushNotificationsCard />
 
       <div className="card" style={{marginBottom:12}}>
-        <div className="chdr">🔒 Seguranca e privacidade</div>
+        <div className="chdr">🔒 Segurança e privacidade</div>
         <div className="cbdy">
           <div className="callout clprv">
-            <strong>Sua chave da IA esta protegida</strong>
-            A chave da Anthropic fica <em>somente no servidor</em> (Edge Function). Nem voce, nem qualquer navegador ou extensao consegue acessar. As chamadas passam pelo Supabase, autenticadas via JWT, e a resposta vem cifrada por HTTPS.
+            <strong>Sua chave da IA está protegida</strong>
+            A chave da Anthropic fica <em>somente no servidor</em> (Edge Function). Nem você, nem qualquer navegador ou extensão consegue acessar. As chamadas passam pelo Supabase, autenticadas via JWT, e a resposta vem cifrada por HTTPS.
           </div>
           <div className="callout clwrn">
-            <strong>LGPD e prontuario</strong>
-            Dados sensiveis (sessoes, anamneses) sao protegidos por Row Level Security no banco: outra clinica nunca ve seus pacientes, e cada papel da equipe so acessa o que lhe compete. Na tela de <strong>Pacientes</strong>, cada cadastro tem os botoes <strong>Exportar</strong> (baixa todos os dados do paciente em JSON, para portabilidade) e <strong>Excluir</strong> (apaga definitivamente o cadastro, sessoes, anamneses e agendamentos daquele paciente — direito ao esquecimento, LGPD art. 18).
+            <strong>LGPD e prontuário</strong>
+            Dados sensíveis (sessões, anamneses) são protegidos por Row Level Security no banco: outra clínica nunca vê seus pacientes, e cada papel da equipe só acessa o que lhe compete. Na tela de <strong>Pacientes</strong>, cada cadastro tem os botões <strong>Exportar</strong> (baixa todos os dados do paciente em JSON, para portabilidade) e <strong>Excluir</strong> (apaga definitivamente o cadastro, sessões, anamneses e agendamentos daquele paciente — direito ao esquecimento, LGPD art. 18).
           </div>
           <div className="callout clwrn">
             <strong>Aviso importante</strong>
-            Este produto ainda nao possui Termos de Uso e Politica de Privacidade revisados por um advogado — consulte <a href="/termos.html" target="_blank" rel="noreferrer">/termos.html</a> e <a href="/privacidade.html" target="_blank" rel="noreferrer">/privacidade.html</a> (rascunhos) antes de operar com pacientes reais.
+            Este produto ainda não possui Termos de Uso e Política de Privacidade revisados por um advogado — consulte <a href="/termos.html" target="_blank" rel="noreferrer">/termos.html</a> e <a href="/privacidade.html" target="_blank" rel="noreferrer">/privacidade.html</a> (rascunhos) antes de operar com pacientes reais.
           </div>
         </div>
       </div>
 
       <div className="card">
-        <div className="chdr">🚀 Integracoes Fase 2</div>
+        <div className="chdr">🚀 Integrações Fase 2</div>
         {[
-          ['Notificacoes push (PWA)', 'Disponivel — ative no card acima'],
-          ['Assinatura digital para relatorios', 'Implementado — aguardando AUTENTIQUE_API_TOKEN'],
+          ['Notificações push (PWA)', 'Disponível — ative no card acima'],
+          ['Assinatura digital para relatórios', 'Implementado — aguardando AUTENTIQUE_API_TOKEN'],
           ['Teleconsulta integrada (Daily.co)', 'Implementado — aguardando DAILY_API_KEY'],
         ].map(([c, s]) =>
           <div key={c} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 13px',borderBottom:'1px solid var(--bdr)',fontSize:12}}>

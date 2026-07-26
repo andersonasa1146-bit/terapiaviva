@@ -64,10 +64,10 @@ export default function Agenda() {
     const ends = form.ends_at ? new Date(form.ends_at) : new Date(starts.getTime() + 60*60*1000)
     const durationMs = ends.getTime() - starts.getTime()
 
-    if (ends <= starts) { toast.error('O horario de fim deve ser depois do inicio.'); return }
+    if (ends <= starts) { toast.error('O horário de fim deve ser depois do início.'); return }
 
     if (!withinWorkingHours(starts, therapist?.working_hours)) {
-      const ok = await confirm('Este horario esta fora do seu expediente configurado (ver Configuracoes). Deseja agendar mesmo assim?', { confirmLabel: 'Agendar assim mesmo' })
+      const ok = await confirm('Este horário está fora do seu expediente configurado (ver Configurações). Deseja agendar mesmo assim?', { confirmLabel: 'Agendar assim mesmo' })
       if (!ok) return
     }
 
@@ -95,13 +95,13 @@ export default function Agenda() {
 
     if (conflictIdx.length === occurrences.length) {
       toast.error(isRecurring
-        ? 'Todas as ocorrencias dessa serie tem conflito de horario com agendamentos existentes. Ajuste o horario e tente novamente.'
-        : 'Ja existe um agendamento nesse horario. Escolha outro horario ou cancele o existente antes de continuar.')
+        ? 'Todas as ocorrências dessa série têm conflito de horário com agendamentos existentes. Ajuste o horário e tente novamente.'
+        : 'Já existe um agendamento nesse horário. Escolha outro horário ou cancele o existente antes de continuar.')
       return
     }
     if (conflictIdx.length) {
       const ok = await confirm(
-        `${conflictIdx.length} de ${count} ocorrencia(s) tem conflito de horario com agendamentos ja existentes e sera(ao) pulada(s). Deseja criar as demais ${count - conflictIdx.length} ocorrencia(s) sem conflito?`,
+        `${conflictIdx.length} de ${count} ocorrência(s) têm conflito de horário com agendamentos já existentes e será(ao) pulada(s). Deseja criar as demais ${count - conflictIdx.length} ocorrência(s) sem conflito?`,
         { confirmLabel: 'Criar as sem conflito' }
       )
       if (!ok) return
@@ -120,7 +120,7 @@ export default function Agenda() {
 
     if (!createdCount) { toast.error('Nenhum agendamento pode ser criado (todos em conflito).'); return }
     toast.success(isRecurring
-      ? `${createdCount} sessao(oes) da serie criada(s)${skipped ? ` (${skipped} pulada(s) por conflito)` : ''}.`
+      ? `${createdCount} sessão(ões) da série criada(s)${skipped ? ` (${skipped} pulada(s) por conflito)` : ''}.`
       : 'Agendamento salvo.')
     setShow(false)
     setForm({ patient_id:'', starts_at:'', ends_at:'', mode:'presencial', amount:'', repeat:'none', occurrences:4 })
@@ -138,11 +138,11 @@ export default function Agenda() {
   }
 
   const cancelSeries = async (a) => {
-    const ok = await confirm('Cancelar esta e todas as proximas ocorrencias desta serie recorrente?', { danger: true, confirmLabel: 'Cancelar serie' })
+    const ok = await confirm('Cancelar esta e todas as próximas ocorrências desta série recorrente?', { danger: true, confirmLabel: 'Cancelar série' })
     if (!ok) return
     const { data, error } = await supabase.rpc('cancel_recurrence_series', { p_recurrence_id: a.recurrence_id })
     if (error) { toast.error(error.message); return }
-    toast.success(`${data} ocorrencia(s) futura(s) cancelada(s).`)
+    toast.success(`${data} ocorrência(s) futura(s) cancelada(s).`)
     load()
   }
 
@@ -200,19 +200,19 @@ export default function Agenda() {
                     <option value="presencial">Presencial</option><option value="online">Online</option>
                   </select>
                 </div>
-                <div className="field"><label>Inicio *</label><input type="datetime-local" required value={form.starts_at} onChange={e=>setForm({...form,starts_at:e.target.value})} /></div>
+                <div className="field"><label>Início *</label><input type="datetime-local" required value={form.starts_at} onChange={e=>setForm({...form,starts_at:e.target.value})} /></div>
                 <div className="field"><label>Fim</label><input type="datetime-local" value={form.ends_at} onChange={e=>setForm({...form,ends_at:e.target.value})} /></div>
                 <div className="field"><label>Valor (R$)</label><input type="number" step="0.01" min="0" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} /></div>
                 <div className="field"><label>Repetir</label>
                   <select value={form.repeat} onChange={e=>setForm({...form,repeat:e.target.value})}>
-                    <option value="none">Nao repetir</option>
+                    <option value="none">Não repetir</option>
                     <option value="weekly">Semanalmente</option>
                     <option value="biweekly">Quinzenalmente</option>
                     <option value="monthly">Mensalmente</option>
                   </select>
                 </div>
                 {form.repeat !== 'none' && (
-                  <div className="field"><label>Numero de sessoes na serie</label>
+                  <div className="field"><label>Número de sessões na série</label>
                     <input type="number" min={2} max={52} value={form.occurrences} onChange={e=>setForm({...form,occurrences:e.target.value})} />
                   </div>
                 )}
@@ -271,13 +271,13 @@ export default function Agenda() {
                   </span>
                 </div>
               )
-            }) : <div style={{padding:'12px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Sem sessoes hoje.</div>}
+            }) : <div style={{padding:'12px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Sem sessões hoje.</div>}
           </div>
         </div>
       </div>
 
       <div className="card">
-        <div className="chdr">Proximos agendamentos</div>
+        <div className="chdr">Próximos agendamentos</div>
         <div className="cbdy" style={{padding:'4px 13px'}}>
           {upcoming.length ? upcoming.map(a => {
             const p = Array.isArray(a.patients) ? a.patients[0] : a.patients
@@ -293,7 +293,7 @@ export default function Agenda() {
                   </button>
                 )}
                 <button className="btn btn-sm" onClick={()=>cancelOne(a)}>Cancelar</button>
-                {a.recurrence_id && <button className="btn btn-sm" style={{color:'var(--red)'}} onClick={()=>cancelSeries(a)}>Cancelar serie</button>}
+                {a.recurrence_id && <button className="btn btn-sm" style={{color:'var(--red)'}} onClick={()=>cancelSeries(a)}>Cancelar série</button>}
               </div>
             )
           }) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhum agendamento futuro.</div>}

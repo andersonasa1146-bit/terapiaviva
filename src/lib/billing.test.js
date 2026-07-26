@@ -21,9 +21,9 @@ afterEach(() => {
 })
 
 describe('chargePatient', () => {
-  it('exige sessao autenticada', async () => {
+  it('exige sessão autenticada', async () => {
     getSession.mockResolvedValue({ data: { session: null } })
-    await expect(chargePatient('p1', 100, 'Sessao')).rejects.toThrow(/autenticada/)
+    await expect(chargePatient('p1', 100, 'Sessão')).rejects.toThrow(/autenticada/)
     expect(fetch).not.toHaveBeenCalled()
   })
 
@@ -34,7 +34,7 @@ describe('chargePatient', () => {
       json: async () => ({ ok: true, checkout_url: 'https://mp' }),
     })
 
-    const res = await chargePatient('p1', 150, 'Sessao individual', 's9')
+    const res = await chargePatient('p1', 150, 'Sessão individual', 's9')
 
     expect(fetch).toHaveBeenCalledWith(
       'https://exemplo.supabase.co/functions/v1/charge-patient',
@@ -46,7 +46,7 @@ describe('chargePatient', () => {
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
       patient_id: 'p1',
       amount: 150,
-      description: 'Sessao individual',
+      description: 'Sessão individual',
       session_id: 's9',
     })
     expect(res.checkout_url).toBe('https://mp')
@@ -62,7 +62,7 @@ describe('chargePatient', () => {
     await expect(chargePatient('p1', 10, 'x')).rejects.toThrow('Muitas requisicoes')
   })
 
-  it('gera erro generico quando a resposta nao tem corpo JSON', async () => {
+  it('gera erro genérico quando a resposta não tem corpo JSON', async () => {
     getSession.mockResolvedValue({ data: { session: { access_token: 't' } } })
     fetch.mockResolvedValue({
       ok: false,

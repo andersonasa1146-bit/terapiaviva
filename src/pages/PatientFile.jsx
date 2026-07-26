@@ -96,17 +96,17 @@ export default function PatientFile() {
   }
 
   const removeSession = async (s) => {
-    const ok = await confirm(`Excluir permanentemente a Sessao #${s.session_number} de ${new Date(s.session_date).toLocaleDateString('pt-BR')}? Esta acao nao pode ser desfeita.`, { danger: true, confirmLabel: 'Excluir' })
+    const ok = await confirm(`Excluir permanentemente a Sessão #${s.session_number} de ${new Date(s.session_date).toLocaleDateString('pt-BR')}? Esta ação não pode ser desfeita.`, { danger: true, confirmLabel: 'Excluir' })
     if (!ok) return
     const { error } = await supabase.from('sessions').delete().eq('id', s.id)
     if (error) { toast.error(error.message); return }
-    toast.success('Sessao excluida.')
+    toast.success('Sessão excluída.')
     if (editingId === s.id) cancelEdit()
     load()
   }
 
   const save = async () => {
-    if (!form.content || form.content.trim().length < 10) { toast.error('Preencha as anotacoes antes de salvar.'); return }
+    if (!form.content || form.content.trim().length < 10) { toast.error('Preencha as anotações antes de salvar.'); return }
     setSaving(true)
 
     if (editingId) {
@@ -125,7 +125,7 @@ export default function PatientFile() {
       }).eq('id', editingId).select().single()
       setSaving(false)
       if (error) { toast.error(error.message); return }
-      toast.success('Sessao atualizada.')
+      toast.success('Sessão atualizada.')
       cancelEdit()
       load()
       return data
@@ -149,7 +149,7 @@ export default function PatientFile() {
     }).select().single()
     setSaving(false)
     if (error) { toast.error(error.message); return }
-    toast.success('Sessao salva.')
+    toast.success('Sessão salva.')
     setForm(BLANK_FORM)
     setAi(null); setAiErr(null)
     load()
@@ -181,7 +181,7 @@ export default function PatientFile() {
           <div>
             <div className="pf-name">{patient.full_name}</div>
             <div className="pf-meta">
-              {patient.profession || '—'} · {patient.church || '—'} · {sessions.length} sessao(oes) · Desde {new Date(patient.started_at).toLocaleDateString('pt-BR')}
+              {patient.profession || '—'} · {patient.church || '—'} · {sessions.length} sessão(ões) · Desde {new Date(patient.started_at).toLocaleDateString('pt-BR')}
             </div>
           </div>
           <div className="pf-actions">
@@ -192,7 +192,7 @@ export default function PatientFile() {
       </div>
 
       <div className="tabs">
-        {[['sess','📝 Sessoes'],['escalas','📊 Escalas'],['arquivos','📎 Arquivos'],...(hasFinancialAccess ? [['cobranca','💵 Cobranca']] : []),['ficha','🗂 Ficha'],['relatorio','📄 Relatorio']].map(([t,l]) => (
+        {[['sess','📝 Sessões'],['escalas','📊 Escalas'],['arquivos','📎 Arquivos'],...(hasFinancialAccess ? [['cobranca','💵 Cobrança']] : []),['ficha','🗂 Ficha'],['relatorio','📄 Relatório']].map(([t,l]) => (
           <button key={t} className={`tab ${tab===t?'on':''}`} onClick={()=>setTab(t)}>{l}</button>
         ))}
       </div>
@@ -201,15 +201,15 @@ export default function PatientFile() {
         <>
           <div className="card" style={{marginBottom:12}}>
             <div className="chdr" style={{background: editingId ? '#FDF6E3' : 'var(--pl)', color: editingId ? '#8a5a06' : 'var(--pd)'}}>
-              <span>{editingId ? `✏️ Editando Sessao #${editingSession?.session_number ?? ''}` : <>📝 Registro de Sessao — <strong>Sessao #{sessions.length+1}</strong></>}</span>
+              <span>{editingId ? `✏️ Editando Sessão #${editingSession?.session_number ?? ''}` : <>📝 Registro de Sessão — <strong>Sessão #{sessions.length+1}</strong></>}</span>
               <div style={{display:'flex', gap:7}}>
-                {editingId && <button className="btn btn-sm" onClick={cancelEdit}>Cancelar edicao</button>}
-                <button className="btn btn-sm btn-p" onClick={save} disabled={saving}>{saving?'Salvando…':(editingId?'Salvar alteracoes':'Salvar sessao')}</button>
+                {editingId && <button className="btn btn-sm" onClick={cancelEdit}>Cancelar edição</button>}
+                <button className="btn btn-sm btn-p" onClick={save} disabled={saving}>{saving?'Salvando…':(editingId?'Salvar alteracoes':'Salvar sessão')}</button>
               </div>
             </div>
             <div className="dual">
               <div className="dp-l">
-                <div className="dp-hdr"><div className="dp-dot" style={{background:'var(--p)'}}></div>Anotacoes da Terapeuta <span style={{fontSize:10,fontWeight:400,color:'var(--txt3)',marginLeft:'auto'}}>Confidencial</span></div>
+                <div className="dp-hdr"><div className="dp-dot" style={{background:'var(--p)'}}></div>Anotações da Terapeuta <span style={{fontSize:10,fontWeight:400,color:'var(--txt3)',marginLeft:'auto'}}>Confidencial</span></div>
                 <div className="dp-body">
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}}>
                     <div className="field"><label>Data</label><input type="date" value={form.session_date} onChange={e=>setForm({...form,session_date:e.target.value})} /></div>
@@ -220,10 +220,10 @@ export default function PatientFile() {
                     </div>
                   </div>
                   <div className="field"><label>Como o paciente chegou</label><input value={form.arrival} onChange={e=>setForm({...form,arrival:e.target.value})} placeholder="Estado emocional, postura, tom de voz..." /></div>
-                  <div className="field"><label>Conteudo da sessao</label><textarea rows={6} value={form.content} onChange={e=>setForm({...form,content:e.target.value})} placeholder="Temas abordados, falas significativas entre aspas, intervencoes..." /></div>
+                  <div className="field"><label>Conteúdo da sessão</label><textarea rows={6} value={form.content} onChange={e=>setForm({...form,content:e.target.value})} placeholder="Temas abordados, falas significativas entre aspas, intervenções..." /></div>
                   {['mood','spirit','openness'].map((k,i)=>(
                     <div className="field" key={k}>
-                      <label>{['😊 Humor','✨ Presenca espiritual','🔓 Abertura'][i]} — {form[k]}/10</label>
+                      <label>{['😊 Humor','✨ Presença espiritual','🔓 Abertura'][i]} — {form[k]}/10</label>
                       <div className="sc-wrap">
                         <input type="range" min={1} max={10} value={form[k]} onChange={e=>setForm({...form,[k]:e.target.value})} />
                         <span className="sc-val">{form[k]}</span>
@@ -238,43 +238,43 @@ export default function PatientFile() {
                       </label>
                     ))}
                   </div>
-                  <div className="field"><label>Objetivos proxima sessao</label><textarea rows={2} value={form.next_goals} onChange={e=>setForm({...form,next_goals:e.target.value})} /></div>
-                  <div className="field"><label>Observacoes confidenciais</label><textarea rows={2} value={form.private_notes} onChange={e=>setForm({...form,private_notes:e.target.value})} /></div>
+                  <div className="field"><label>Objetivos próxima sessão</label><textarea rows={2} value={form.next_goals} onChange={e=>setForm({...form,next_goals:e.target.value})} /></div>
+                  <div className="field"><label>Observações confidenciais</label><textarea rows={2} value={form.private_notes} onChange={e=>setForm({...form,private_notes:e.target.value})} /></div>
                   <div style={{display:'flex',gap:7,marginTop:4}}>
                     <button className="btn btn-t" onClick={analyzeCurrent} disabled={aiLoad}>{aiLoad?'Analisando…':'🧠 Salvar e analisar com IA'}</button>
                   </div>
                 </div>
               </div>
               <div>
-                <div className="dp-hdr"><div className="dp-dot" style={{background:'var(--t)'}}></div>Analise IA de Apoio Clinico</div>
+                <div className="dp-hdr"><div className="dp-dot" style={{background:'var(--t)'}}></div>Análise IA de Apoio Clínico</div>
                 <div className="dp-body">
-                  {aiLoad ? <div className="loading"><div className="spin"></div>Analisando sessao…</div>
+                  {aiLoad ? <div className="loading"><div className="spin"></div>Analisando sessão…</div>
                   : aiErr ? <div style={{padding:14,fontSize:12,color:'var(--red)'}}>{aiErr}</div>
                   : ai ? <AISessResult r={ai} />
-                  : <div style={{padding:20,textAlign:'center',fontSize:12,color:'var(--txt2)'}}><div style={{fontSize:22,marginBottom:10}}>🧠</div>Salve e clique em <strong>Analisar com IA</strong> para receber apoio clinico.</div>}
+                  : <div style={{padding:20,textAlign:'center',fontSize:12,color:'var(--txt2)'}}><div style={{fontSize:22,marginBottom:10}}>🧠</div>Salve e clique em <strong>Analisar com IA</strong> para receber apoio clínico.</div>}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="card hist-wrap">
-            <div className="chdr">Historico de sessoes ({sessions.length})</div>
+            <div className="chdr">Histórico de sessões ({sessions.length})</div>
             <div className="cbdy" style={{padding:'4px 13px'}}>
               {sessions.length ? sessions.map(s => (
                 <div key={s.id} className="hist-row">
                   <div className="hist-hdr">
-                    <span className="hist-num">Sessao #{s.session_number}</span>
+                    <span className="hist-num">Sessão #{s.session_number}</span>
                     <span className="hist-date">{new Date(s.session_date).toLocaleDateString('pt-BR')}</span>
                     {s.edited_at && <span style={{fontSize:9.5,color:'var(--txt3)',fontStyle:'italic'}}>editada</span>}
                     <span style={{marginLeft:'auto',fontSize:10,color:'var(--txt2)'}}>😊{s.mood}/10 · ✨{s.spirit}/10</span>
-                    <button className="btn btn-sm" style={{padding:'2px 8px',fontSize:10.5}} onClick={()=>setAudioOpenId(audioOpenId===s.id?null:s.id)}>🎙️ Audio{s.audio_path?' ✓':''}</button>
+                    <button className="btn btn-sm" style={{padding:'2px 8px',fontSize:10.5}} onClick={()=>setAudioOpenId(audioOpenId===s.id?null:s.id)}>🎙️ Áudio{s.audio_path?' ✓':''}</button>
                     <button className="btn btn-sm" style={{padding:'2px 8px',fontSize:10.5}} onClick={()=>startEdit(s)}>✏️ Editar</button>
                     <button className="btn btn-sm" style={{padding:'2px 8px',fontSize:10.5,color:'var(--red)'}} onClick={()=>removeSession(s)}>🗑</button>
                   </div>
                   <div className="hist-sum">{s.content}</div>
                   {audioOpenId === s.id && <AudioPanel s={s} onUpdated={load} />}
                 </div>
-              )) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhuma sessao registrada ainda.</div>}
+              )) : <div style={{padding:'14px 0',textAlign:'center',fontSize:12,color:'var(--txt3)'}}>Nenhuma sessão registrada ainda.</div>}
             </div>
           </div>
         </>
@@ -288,14 +288,14 @@ export default function PatientFile() {
 
       {tab === 'ficha' && (
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-          <div className="card"><div className="chdr">Dados de identificacao</div><div className="cbdy">
+          <div className="card"><div className="chdr">Dados de identificação</div><div className="cbdy">
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-              {[['Nome',patient.full_name],['Nascimento',patient.birthdate||'—'],['Profissao',patient.profession||'—'],['Cidade',patient.city||'—'],['Igreja',patient.church||'—'],['Telefone',patient.phone||'—']].map(([k,v])=>(
+              {[['Nome',patient.full_name],['Nascimento',patient.birthdate||'—'],['Profissão',patient.profession||'—'],['Cidade',patient.city||'—'],['Igreja',patient.church||'—'],['Telefone',patient.phone||'—']].map(([k,v])=>(
                 <div key={k}><div style={{fontSize:10,color:'var(--txt2)',marginBottom:1}}>{k}</div><div style={{fontSize:12,fontWeight:500}}>{v}</div></div>
               ))}
             </div>
           </div></div>
-          <div className="card"><div className="chdr">Objetivos terapeuticos</div><div className="cbdy">
+          <div className="card"><div className="chdr">Objetivos terapêuticos</div><div className="cbdy">
             {(patient.goals ?? []).map(g=>(
               <div key={g} style={{display:'flex',alignItems:'center',gap:7,padding:'6px 0',borderBottom:'1px solid var(--bdr)',fontSize:12}}>
                 <span style={{color:'var(--p)'}}>✓</span>{g}
@@ -308,7 +308,7 @@ export default function PatientFile() {
       {tab === 'relatorio' && (
         <div>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-            <div><h2 style={{fontSize:15,fontWeight:600}}>Relatorio Clinico — {patient.full_name}</h2>
+            <div><h2 style={{fontSize:15,fontWeight:600}}>Relatório Clínico — {patient.full_name}</h2>
               <p style={{fontSize:11,color:'var(--txt2)'}}>Documento confidencial · LGPD</p></div>
             {/* fillPrintArea explicito alem do beforeprint: alguns navegadores
                 (Safari mais antigo) nao disparam o evento de forma confiavel. */}
@@ -319,25 +319,25 @@ export default function PatientFile() {
           </div>
           <div className="rpt-doc" id="rpt-content">
             <div className="rpt-logo"><h2>{SITE.appName}</h2><p>Documento confidencial · LGPD</p></div>
-            <div className="rpt-sec"><div className="rpt-ttl">Identificacao</div><div className="rpt-grid">
-              {[['Nome',patient.full_name],['Profissao',patient.profession||'—'],['Igreja',patient.church||'—'],['Total de sessoes',sessions.length],['Nivel de risco',patient.risk.toUpperCase()],['Data',new Date().toLocaleDateString('pt-BR')]].map(([k,v])=>(
+            <div className="rpt-sec"><div className="rpt-ttl">Identificação</div><div className="rpt-grid">
+              {[['Nome',patient.full_name],['Profissão',patient.profession||'—'],['Igreja',patient.church||'—'],['Total de sessões',sessions.length],['Nível de risco',patient.risk.toUpperCase()],['Data',new Date().toLocaleDateString('pt-BR')]].map(([k,v])=>(
                 <div key={k} className="rpt-fld"><strong>{k}</strong>{v}</div>
               ))}
             </div></div>
-            <div className="rpt-sec"><div className="rpt-ttl">Objetivos Terapeuticos</div>
+            <div className="rpt-sec"><div className="rpt-ttl">Objetivos Terapêuticos</div>
               {(patient.goals ?? []).map(g=><div key={g} style={{fontSize:12,marginBottom:3}}>• {g}</div>)}
             </div>
-            <div className="rpt-sec"><div className="rpt-ttl">Historico de Sessoes</div>
+            <div className="rpt-sec"><div className="rpt-ttl">Histórico de Sessões</div>
               {sessions.length ? sessions.map(s=>(
                 <div className="rpt-sess" key={s.id}>
                   <div className="rpt-sess-hdr">
-                    <span style={{background:'var(--tl)',color:'var(--td)',padding:'1px 7px',borderRadius:4,fontSize:11}}>Sessao #{s.session_number}</span>
+                    <span style={{background:'var(--tl)',color:'var(--td)',padding:'1px 7px',borderRadius:4,fontSize:11}}>Sessão #{s.session_number}</span>
                     <span>{new Date(s.session_date).toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}</span>
                     <span style={{marginLeft:'auto',fontSize:11,color:'var(--txt2)'}}>Humor {s.mood}/10 · Espiritual {s.spirit}/10</span>
                   </div>
                   <div className="rpt-sess-txt">{s.content}</div>
                 </div>
-              )) : <p style={{fontSize:12,color:'var(--txt2)'}}>Nenhuma sessao registrada.</p>}
+              )) : <p style={{fontSize:12,color:'var(--txt2)'}}>Nenhuma sessão registrada.</p>}
             </div>
           </div>
           <SignaturePanel patientId={id} />
@@ -352,12 +352,12 @@ function AISessResult({ r }) {
   const List = ({a}) => (a||[]).map((i,idx) => <div key={idx} className="ai-li">{i}</div>)
   return (
     <>
-      <div className={`ai-pill ${rc}`}>⚠ Sessao: {r.nivel_sessao}</div>
-      <div className="ai-blk"><div className="ai-ttl">Observacoes clinicas</div><List a={r.observacoes_clinicas} /></div>
+      <div className={`ai-pill ${rc}`}>⚠ Sessão: {r.nivel_sessao}</div>
+      <div className="ai-blk"><div className="ai-ttl">Observações clínicas</div><List a={r.observacoes_clinicas} /></div>
       <div className="ai-blk"><div className="ai-ttl">Estado geral</div><div className="ai-focus">{r.estado_geral}</div></div>
-      <div className="ai-blk"><div className="ai-ttl">Padroes identificados</div><List a={r.padroes} /></div>
-      <div className="ai-blk"><div className="ai-ttl">Sugestoes proxima sessao</div><List a={r.sugestoes_proxima} /></div>
-      <div className="ai-blk"><div className="ai-ttl">Recursos biblicos</div>
+      <div className="ai-blk"><div className="ai-ttl">Padrões identificados</div><List a={r.padroes} /></div>
+      <div className="ai-blk"><div className="ai-ttl">Sugestões próxima sessão</div><List a={r.sugestoes_proxima} /></div>
+      <div className="ai-blk"><div className="ai-ttl">Recursos bíblicos</div>
         {(r.versiculos||[]).map((v,i) => <div key={i} className="ai-verse"><strong>{v.ref}</strong>{v.contexto}</div>)}
       </div>
       {(r.alertas||[]).length ? <div className="ai-blk"><div className="ai-ttl" style={{color:'var(--red)'}}>⚠ Alertas</div><List a={r.alertas} /></div> : null}
