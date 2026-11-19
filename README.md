@@ -636,6 +636,16 @@ de marca (`VITE_APP_NAME`, `VITE_THERAPIST_NAME`, etc.) na dashboard do
 Cloudflare — uma instalacao por cliente, cada uma com seu proprio projeto
 Supabase e suas proprias variaveis.
 
+**Supabase Auth — URLs (obrigatorio para "Esqueci minha senha")**: em
+Authentication -> URL Configuration, defina o **Site URL** com o endereco
+publico do app (ex.: `https://app.seudominio.com`) e adicione
+`https://app.seudominio.com/**` em **Redirect URLs**. O link de recuperacao
+enviado por e-mail volta para `/redefinir-senha` (ver `src/lib/recovery.js`);
+links enviados pelo painel do Supabase ("Send password recovery") caem no
+Site URL e o app os encaminha para essa mesma tela. Com o SMTP padrao do
+Supabase o envio e limitado e so chega a e-mails da equipe da organizacao —
+para clientes reais configure um SMTP proprio em Authentication -> Emails.
+
 Antes de operar com pacientes reais, revise e complete `/termos.html` e
 `/privacidade.html` (rascunhos LGPD) com um advogado.
 
