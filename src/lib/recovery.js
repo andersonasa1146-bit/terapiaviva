@@ -84,6 +84,14 @@ export async function updatePassword(password) {
 
 export function translateAuthError(err) {
   const msg = String(err?.message || err || '')
+  const code = String(err?.code || '')
+  // SMTP padrao do Supabase so entrega para e-mails da equipe do projeto.
+  if (code === 'email_address_not_authorized' || /address not authorized/i.test(msg)) {
+    return 'Não foi possível enviar o e-mail para este endereço agora. Fale com o administrador do TerapiaViva.'
+  }
+  if (code === 'insufficient_aal' || /aal2/i.test(msg)) {
+    return 'Confirme a verificação em duas etapas antes de trocar a senha.'
+  }
   if (/different from the old password/i.test(msg)) {
     return 'A nova senha precisa ser diferente da senha atual.'
   }

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SITE } from '../config/site'
+import { useAuth } from '../contexts/AuthContext'
+import MFAChallenge from '../components/MFAChallenge'
 import { supabase } from '../lib/supabase'
 import {
   MIN_PASSWORD_LENGTH,
@@ -12,9 +14,17 @@ import {
 
 // Tela aberta pelo link de "Esqueci minha senha" enviado por e-mail.
 // Ver src/lib/recovery.js para o fluxo completo.
+//
+// Contas com 2FA: a sessao de recuperacao nasce em aal1 e o Supabase exige
+// aal2 para trocar a senha (erro insufficient_aal) — por isso, antes do
+// formulario, a tela pede o codigo do autenticador (MFAChallenge), como no
+// login normal.
 export default function ResetPassword() {
   const nav = useNavigate()
+  const { session, mfaChecked, mfaPending } = useAuth()
   const started = useRef(false)
+  const hadSession = useRef(false)
+  const finishing = useRef(false)
   const [stage, setStage] = useState('checking') // checking | form | invalid
   const [error, setError] = useState('')
   const [password, setPass] = useState('')
@@ -48,6 +58,16 @@ export default function ResetPassword() {
     })()
   }, [])
 
+  // Se a pessoa sair pelo desafio de 2FA ("Sair e entrar com outra conta"),
+  // volta para o login em vez de ficar presa nesta tela.
+  useEffect(() => {
+    if (session) {
+      hadSession.current = true
+    } else if (hadSession.current && stage === 'form' && !finishing.current) {
+      nav('/login', { replace: true })
+    }
+  }, [session, stage, nav])
+
   const submit = async (e) => {
     e.preventDefault()
     setError('')
@@ -62,6 +82,7 @@ export default function ResetPassword() {
     setBusy(true)
     try {
       await updatePassword(password)
+      finishing.current = true
       // Encerra a sessao de recuperacao (e as demais sessoes da conta) para
       // que o proximo acesso use a senha nova — e passe pelo 2FA, se ativo.
       await supabase.auth.signOut().catch(() => {})
@@ -90,13 +111,15 @@ export default function ResetPassword() {
     </div>
   )
 
+  if (stage === 'form' && session && mfaChecked && mfaPending) return <MFAChallenge />
+
   return (
     <div className="auth-shell">
       <div className="auth-card">
         <h1>🌿 {SITE.appName}</h1>
         <p className="sub">Criar nova senha</p>
 
-        {stage === 'checking' && (
+        {(stage === 'checking' || (stage === 'form' && (!session || !mfaChecked))) && (
           <p style={{ fontSize: 12, color: 'var(--txt2)', textAlign: 'center' }}>
             Verificando o link…
           </p>
@@ -128,7 +151,7 @@ export default function ResetPassword() {
           </>
         )}
 
-        {stage === 'form' && (
+        {stage === 'form' && session && mfaChecked && (
           <form onSubmit={submit}>
             <div className="field">
               <label>Nova senha</label>

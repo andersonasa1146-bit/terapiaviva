@@ -130,6 +130,24 @@ describe('translateAuthError', () => {
   ])('%s', (msg, expected) => {
     expect(translateAuthError(new Error(msg))).toMatch(expected)
   })
+  it('traduz e-mail recusado pelo SMTP padrão', () => {
+    expect(
+      translateAuthError(
+        Object.assign(new Error('Email address not authorized'), {
+          code: 'email_address_not_authorized',
+        }),
+      ),
+    ).toMatch(/administrador/)
+  })
+  it('traduz exigência de 2FA', () => {
+    expect(
+      translateAuthError(
+        Object.assign(new Error('AAL2 session is required to update email or password'), {
+          code: 'insufficient_aal',
+        }),
+      ),
+    ).toMatch(/duas etapas/)
+  })
   it('mantém mensagens desconhecidas', () => {
     expect(translateAuthError(new Error('Algo diferente'))).toBe('Algo diferente')
   })
