@@ -1,0 +1,40 @@
+<!-- Supabase Auth > Emails > Templates > Invite user
+     Assunto: Você recebeu um convite para o TerapiaViva -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7f5;padding:32px 12px;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:12px;border:1px solid #e3ebe7;">
+        <tr>
+          <td style="padding:28px 32px 8px;">
+            <div style="font-size:20px;font-weight:bold;color:#085041;">🌿 TerapiaViva</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 32px 0;color:#2b3a35;font-size:15px;line-height:1.6;">
+            <p style="margin:0 0 14px;">Olá,</p>
+            <p style="margin:0 0 14px;">Você recebeu um convite para usar o TerapiaViva com o e-mail <strong>{{ .Email }}</strong>.</p>
+            <p style="margin:0 0 22px;">Clique no botão abaixo para aceitar o convite:</p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:0 32px 22px;">
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#1D9E75;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:13px 28px;border-radius:8px;">Aceitar convite</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 8px;color:#5b6b66;font-size:13px;line-height:1.6;">
+            <p style="margin:0 0 12px;">Na tela de login, use <strong>“Esqueci minha senha”</strong> com este mesmo e-mail para criar a sua senha de acesso.</p>
+            <p style="margin:0 0 12px;">Se você não esperava este convite, ignore este e-mail.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 32px 26px;color:#8a9a95;font-size:12px;line-height:1.5;border-top:1px solid #eef2f0;">
+            <p style="margin:14px 0 6px;">Se o botão não funcionar, copie e cole este endereço no navegador:</p>
+            <p style="margin:0;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#1D9E75;">{{ .ConfirmationURL }}</a></p>
+          </td>
+        </tr>
+      </table>
+      <p style="color:#9aa8a3;font-size:11px;margin:16px 0 0;">TerapiaViva · e-mail automático, não responda.</p>
+    </td>
+  </tr>
+</table>

@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { SITE } from '../config/site'
+import { requestPasswordReset, translateAuthError } from '../lib/recovery'
 
 export default function Login() {
   const { session, signIn, signUp } = useAuth()
   const nav = useNavigate()
-  const [mode, setMode] = useState('login')
+  const location = useLocation()
+  // mode: 'login' | 'signup' | 'forgot' (Esqueci minha senha)
+  const [mode, setMode] = useState(location.state?.mode || 'login')
   const [full_name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPass] = useState('')
-  const [err, setErr] = useState('')
+  const [err, setErr] = useState(location.state?.msg || '')
   const [busy, setBusy] = useState(false)
 
   if (session) return <Navigate to="/" replace />
@@ -18,13 +21,23 @@ export default function Login() {
   const submit = async (e) => {
     e.preventDefault()
     setErr(''); setBusy(true)
+    if (mode === 'forgot') {
+      try {
+        await requestPasswordReset(email)
+        setErr('✅ Se houver uma conta com este e-mail, enviamos um link para criar uma nova senha. Confira também a caixa de spam.')
+        setMode('login')
+      } catch (e2) {
+        setErr(translateAuthError(e2))
+      } finally { setBusy(false) }
+      return
+    }
     try {
       const { error } = mode === 'login'
         ? await signIn(email, password)
         : await signUp(email, password, full_name)
       if (error) throw error
       if (mode === 'signup') {
-        setErr('✅ Conta criada. Verifique seu email e faca login.')
+        setErr('✅ Conta criada. Verifique seu e-mail e faça login.')
         setMode('login')
       } else {
         nav('/', { replace: true })
@@ -38,7 +51,10 @@ export default function Login() {
     <div className="auth-shell">
       <div className="auth-card">
         <h1>🌿 {SITE.appName}</h1>
-        {SITE.loginVerse && <p className="sub">{SITE.loginVerse}</p>}
+        {SITE.loginVerse && mode !== 'forgot' && <p className="sub">{SITE.loginVerse}</p>}
+        {mode === 'forgot' && (
+          <p className="sub">Informe o e-mail da sua conta. Vamos enviar um link para você criar uma nova senha.</p>
+        )}
         <form onSubmit={submit}>
           {mode === 'signup' && (
             <div className="field">
@@ -50,18 +66,27 @@ export default function Login() {
             <label>E-mail</label>
             <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} required autoComplete="email" />
           </div>
-          <div className="field">
-            <label>Senha</label>
-            <input type="password" value={password} onChange={(e)=>setPass(e.target.value)} required autoComplete={mode==='login'?'current-password':'new-password'} />
-          </div>
+          {mode !== 'forgot' && (
+            <div className="field">
+              <label>Senha</label>
+              <input type="password" value={password} onChange={(e)=>setPass(e.target.value)} required autoComplete={mode==='login'?'current-password':'new-password'} />
+            </div>
+          )}
+          {mode === 'login' && (
+            <p style={{fontSize:11,textAlign:'right',margin:'-2px 0 6px'}}>
+              <a onClick={()=>{ setErr(''); setMode('forgot') }} style={{color:'var(--p)',cursor:'pointer',fontWeight:500}}>
+                Esqueci minha senha
+              </a>
+            </p>
+          )}
           {err && <div style={{fontSize:11,color:err.startsWith('✅')?'var(--pd)':'var(--red)',marginBottom:8,padding:8,background:err.startsWith('✅')?'var(--pl)':'var(--redl)',borderRadius:6}}>{err}</div>}
           <button type="submit" disabled={busy} className="btn btn-p" style={{width:'100%',marginTop:8}}>
-            {busy ? 'Aguarde…' : (mode==='login' ? 'Entrar' : 'Criar conta')}
+            {busy ? 'Aguarde…' : (mode==='login' ? 'Entrar' : mode==='forgot' ? 'Enviar link' : 'Criar conta')}
           </button>
         </form>
         <p style={{fontSize:11,color:'var(--txt2)',marginTop:14,textAlign:'center'}}>
-          {mode==='login' ? 'Nova terapeuta?' : 'Já tem conta?'}{' '}
-          <a onClick={()=>setMode(mode==='login'?'signup':'login')} style={{color:'var(--p)',cursor:'pointer',fontWeight:500}}>
+          {mode==='login' ? 'Nova terapeuta?' : mode==='forgot' ? 'Lembrou a senha?' : 'Já tem conta?'}{' '}
+          <a onClick={()=>{ setErr(''); setMode(mode==='login'?'signup':'login') }} style={{color:'var(--p)',cursor:'pointer',fontWeight:500}}>
             {mode==='login' ? 'Criar conta grátis' : 'Fazer login'}
           </a>
         </p>

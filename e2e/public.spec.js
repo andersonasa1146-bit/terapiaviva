@@ -33,6 +33,31 @@ test.describe('Login', () => {
   })
 })
 
+test.describe('Esqueci minha senha', () => {
+  test('mostra o modo de recuperacao sem campo de senha', async ({ page }) => {
+    await page.goto('/login')
+    await page.getByText('Esqueci minha senha').click()
+    await expect(page.locator('.auth-card input[type="email"]')).toBeVisible()
+    await expect(page.locator('.auth-card input[type="password"]')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Enviar link' })).toBeVisible()
+    await page.getByText('Fazer login').click()
+    await expect(page.getByRole('button', { name: 'Entrar' })).toBeVisible()
+  })
+
+  test('tela de nova senha sem link pede um novo link', async ({ page }) => {
+    await page.goto('/redefinir-senha')
+    await expect(page.getByRole('button', { name: 'Pedir um novo link' })).toBeVisible()
+  })
+
+  test('link expirado na raiz e encaminhado para a tela de nova senha', async ({ page }) => {
+    await page.goto('/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired')
+    await expect(page).toHaveURL(/\/redefinir-senha$/)
+    await expect(page.locator('.auth-card')).toContainText('expirou')
+    await page.getByRole('button', { name: 'Pedir um novo link' }).click()
+    await expect(page.getByRole('button', { name: 'Enviar link' })).toBeVisible()
+  })
+})
+
 test.describe('Paginas legais estaticas', () => {
   test('Termos de Uso carrega', async ({ page }) => {
     await page.goto('/termos.html')

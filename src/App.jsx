@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 import Layout from './components/Layout'
 import MFAChallenge from './components/MFAChallenge'
@@ -18,6 +18,8 @@ import Alerts from './pages/Alerts'
 import TeamAccept from './pages/TeamAccept'
 import AuditLog from './pages/AuditLog'
 import AdminPanel from './pages/AdminPanel'
+import ResetPassword from './pages/ResetPassword'
+import { RESET_PATH, isRecoveryRedirect } from './lib/recovery'
 
 function Private({ children }) {
   const { session, loading, mfaChecked, mfaPending } = useAuth()
@@ -28,9 +30,19 @@ function Private({ children }) {
 }
 
 export default function App() {
+  const location = useLocation()
+
+  // Link de "Esqueci minha senha" enviado pelo painel do Supabase cai no
+  // Site URL (raiz do app) com os tokens no #hash — encaminha para a tela de
+  // nova senha antes que a rota privada mande para /login e o #hash se perca.
+  if (location.pathname !== RESET_PATH && isRecoveryRedirect(location.hash)) {
+    return <Navigate to={`${RESET_PATH}${location.hash}`} replace />
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path={RESET_PATH} element={<ResetPassword />} />
       <Route path="/a/:token" element={<PublicAnamnese />} />
       <Route path="/equipe/aceitar/:token" element={<TeamAccept />} />
 
