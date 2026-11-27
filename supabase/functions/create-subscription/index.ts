@@ -47,6 +47,16 @@ Deno.serve(async (req) => {
     const rl = await checkRateLimit(supabase, `create-subscription:${userRes.user.id}`, 5, 60);
     if (!rl) return rateLimitResponse(corsHeaders);
 
+    // So a proprietaria da clinica assina, e nao faz sentido abrir checkout
+    // para conta de cortesia ou que ja tem assinatura ativa.
+    const { data: access } = await supabase.rpc("get_my_access_status");
+    if (access && access.is_owner === false) {
+      return json(corsHeaders, { error: "Somente a proprietária da conta pode assinar o plano." }, 403);
+    }
+    if (access && (access.status === "cortesia" || access.status === "assinante")) {
+      return json(corsHeaders, { error: "Esta conta já tem acesso liberado — não é preciso assinar." }, 409);
+    }
+
     const { data: therapist } = await supabase
       .from("therapists").select("full_name, email").eq("id", userRes.user.id).maybeSingle();
 
@@ -83,7 +93,10 @@ Deno.serve(async (req) => {
 
     const mpData = await mpRes.json();
 
-    await supabase.from("therapists").update({
+    // Grava com a service role: as colunas de assinatura sao travadas para o
+    // client (trigger protect_therapist_billing_columns).
+    const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    await admin.from("therapists").update({
       mp_subscription_id: mpData.id,
       mp_subscription_status: "pending",
     }).eq("id", userRes.user.id);

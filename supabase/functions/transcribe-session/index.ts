@@ -12,6 +12,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { initSentry, captureError } from "../_shared/sentry.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
+import { hasActiveAccess, noAccessResponse } from "../_shared/access.ts";
 import { corsHeadersFor } from "../_shared/cors.ts";
 
 initSentry("transcribe-session");
@@ -50,6 +51,8 @@ Deno.serve(async (req) => {
     // limite mais apertado que os das analises de texto.
     const rl = await checkRateLimit(supabase, `transcribe-session:${userRes.user.id}`, 6, 60);
     if (!rl) return rateLimitResponse(corsHeaders);
+    // Teste de 45 dias vencido / assinatura inativa: recurso indisponivel.
+    if (!(await hasActiveAccess(supabase))) return noAccessResponse(corsHeaders);
 
     // Checa cota mensal de IA do plano ANTES de gastar com o provedor.
     const { data: quota } = await supabase.rpc("check_ai_quota", { p_therapist_id: userRes.user.id });

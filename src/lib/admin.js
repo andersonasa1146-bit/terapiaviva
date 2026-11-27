@@ -27,6 +27,28 @@ export async function setMrrPrice(price) {
   if (error) throw error
 }
 
+// Cortesia: a conta usa o app sem assinatura e sem prazo de teste.
+export async function setBillingExempt(ownerId, exempt) {
+  const { error } = await supabase.rpc('admin_set_billing_exempt', { p_owner_id: ownerId, p_exempt: exempt })
+  if (error) throw error
+}
+
+// Soma dias ao teste gratis (a partir de hoje, se ja tiver vencido).
+export async function extendTrial(ownerId, days) {
+  const { data, error } = await supabase.rpc('admin_extend_trial', { p_owner_id: ownerId, p_days: days })
+  if (error) throw error
+  return data
+}
+
+// Status de acesso de uma conta na lista do painel (mesma regra do banco).
+export function accountAccessStatus(a) {
+  if (a.billing_exempt) return 'cortesia'
+  if (['profissional', 'basico'].includes(a.plan)) return 'assinante'
+  if (a.trial_ends_at && new Date(a.trial_ends_at) > new Date()) return 'teste'
+  if (a.plan === 'cancelado') return 'cancelado'
+  return a.has_access ? 'admin' : 'teste_encerrado'
+}
+
 export const PLAN_LABEL = {
   trial: 'Trial',
   profissional: 'Profissional',

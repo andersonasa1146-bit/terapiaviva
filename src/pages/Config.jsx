@@ -8,6 +8,7 @@ import { connectGoogleCalendar, disconnectGoogleCalendar } from '../lib/googleCa
 import { listTeamMembers, inviteTeamMember, removeTeamMember, updateTeamMemberRole, ROLE_LABEL, ROLE_DESCRIPTION } from '../lib/team'
 import TwoFactorCard from '../components/TwoFactorCard'
 import PushNotificationsCard from '../components/PushNotificationsCard'
+import { describeAccess, canSubscribe } from '../lib/access'
 
 const PLAN_LABEL = { trial: 'Período de teste', basico: 'Básico', profissional: 'Profissional', cancelado: 'Cancelado' }
 const TEAM_ROLE_LABEL = { owner: 'Proprietária(o) da conta', admin: 'Administrador(a)', terapeuta: 'Terapeuta', recepcao: 'Recepção' }
@@ -31,7 +32,7 @@ function toJsonb(rows) {
 }
 
 export default function Config() {
-  const { session, therapist, profile, isOwner, teamRole } = useAuth()
+  const { session, therapist, profile, isOwner, teamRole, access, refreshAccess } = useAuth()
   const { toast, confirm, promptCopy } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const [form, setForm] = useState({ full_name:'', city:'', church:'', crp:'', bio:'' })
@@ -87,6 +88,10 @@ export default function Config() {
     if (g) { searchParams.delete('google'); searchParams.delete('msg'); setSearchParams(searchParams, { replace: true }) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Ao voltar do checkout do Mercado Pago (MP_BACK_URL aponta para /config),
+  // atualiza o status da assinatura.
+  useEffect(() => { if (session?.user) refreshAccess() }, [session, refreshAccess])
 
   const save = async (e) => {
     e.preventDefault()
@@ -203,6 +208,7 @@ export default function Config() {
   }
 
   const plan = therapist?.plan || 'trial'
+  const accessInfo = describeAccess(access)
   const used = therapist?.ai_calls_this_month ?? 0
   const limit = therapist?.plan_ai_limit ?? 30
   const pct = Math.min(100, Math.round((used / (limit || 1)) * 100))
@@ -228,12 +234,13 @@ export default function Config() {
         <div className="card" style={{marginBottom:12}}>
           <div className="chdr">💳 Plano e uso de IA</div>
           <div className="cbdy">
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,gap:10,flexWrap:'wrap'}}>
               <div>
-                <div style={{fontSize:13,fontWeight:600}}>{PLAN_LABEL[plan] || plan}</div>
+                <div style={{fontSize:13,fontWeight:600}}>{access ? accessInfo.label : (PLAN_LABEL[plan] || plan)}</div>
+                {accessInfo.detail && <div style={{fontSize:11,color:'var(--txt2)'}}>{accessInfo.detail}</div>}
                 <div style={{fontSize:11,color:'var(--txt2)'}}>{used} de {limit} análises de IA usadas este mês (compartilhado por toda a equipe)</div>
               </div>
-              {plan !== 'profissional' && (
+              {(access ? canSubscribe(access) : plan !== 'profissional') && (
                 <button className="btn btn-p btn-sm" onClick={subscribe} disabled={subBusy}>
                   {subBusy ? 'Abrindo checkout…' : 'Assinar plano Profissional'}
                 </button>

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { getMyAccessStatus } from '../lib/access'
 
 const AuthCtx = createContext(null)
 
@@ -52,6 +53,17 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [mfaPending, setMfaPending] = useState(false)
   const [mfaChecked, setMfaChecked] = useState(false)
+  // Assinatura: status da clinica (teste/assinante/cortesia/encerrado).
+  // `accessChecked` evita piscar a tela de bloqueio antes da resposta.
+  const [access, setAccess] = useState(null)
+  const [accessChecked, setAccessChecked] = useState(false)
+
+  const refreshAccess = useCallback(async () => {
+    const status = await getMyAccessStatus()
+    setAccess(status)
+    setAccessChecked(true)
+    return status
+  }, [])
 
   const refreshMfaStatus = useCallback(async () => {
     const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
@@ -81,21 +93,25 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!session?.user) {
       setProfile(null); setTherapist(null); setOwnerId(null); setTeamRole('owner'); setIsPlatformAdmin(false)
+      setAccess(null); setAccessChecked(false)
       return
     }
     let cancelled = false
 
     ;(async () => {
-      const [{ data: oid }, { data: role }, { data: platformAdmin }] = await Promise.all([
+      const [{ data: oid }, { data: role }, { data: platformAdmin }, accessStatus] = await Promise.all([
         supabase.rpc('current_owner_id'),
         supabase.rpc('current_team_role'),
         supabase.rpc('is_platform_admin'),
+        getMyAccessStatus(),
       ])
       if (cancelled) return
       const effectiveOwnerId = oid || session.user.id
       setOwnerId(effectiveOwnerId)
       setTeamRole(role || 'owner')
       setIsPlatformAdmin(!!platformAdmin)
+      setAccess(accessStatus)
+      setAccessChecked(true)
 
       const { data: own } = await supabase.from('therapists')
         .select(THERAPIST_SAFE_COLUMNS).eq('id', session.user.id).maybeSingle()
@@ -131,6 +147,7 @@ export function AuthProvider({ children }) {
       session, profile, therapist, ownerId, teamRole, loading,
       isOwner, hasClinicalAccess, hasFinancialAccess, isTeamAdmin, isPlatformAdmin,
       mfaPending, mfaChecked, refreshMfaStatus,
+      access, accessChecked, refreshAccess,
       signIn, signUp, signOut,
     }}>
       {children}

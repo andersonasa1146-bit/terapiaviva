@@ -3,6 +3,7 @@ import { useNavigate, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { SITE } from '../config/site'
 import { requestPasswordReset, translateAuthError } from '../lib/recovery'
+import { TRIAL_DAYS } from '../lib/access'
 
 export default function Login() {
   const { session, signIn, signUp } = useAuth()
@@ -54,6 +55,11 @@ export default function Login() {
         {SITE.loginVerse && mode !== 'forgot' && <p className="sub">{SITE.loginVerse}</p>}
         {mode === 'forgot' && (
           <p className="sub">Informe o e-mail da sua conta. Vamos enviar um link para você criar uma nova senha.</p>
+        )}
+        {mode === 'signup' && (
+          <div className="consent-box" style={{ textAlign: 'center', marginBottom: 12 }}>
+            {TRIAL_DAYS} dias grátis para testar tudo, sem cartão de crédito.
+          </div>
         )}
         <form onSubmit={submit}>
           {mode === 'signup' && (
