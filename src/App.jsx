@@ -19,13 +19,19 @@ import TeamAccept from './pages/TeamAccept'
 import AuditLog from './pages/AuditLog'
 import AdminPanel from './pages/AdminPanel'
 import ResetPassword from './pages/ResetPassword'
+import SubscriptionRequired from './components/SubscriptionRequired'
 import { RESET_PATH, isRecoveryRedirect } from './lib/recovery'
+import { isBlocked } from './lib/access'
 
 function Private({ children }) {
-  const { session, loading, mfaChecked, mfaPending } = useAuth()
+  const { session, loading, mfaChecked, mfaPending, access, accessChecked, isPlatformAdmin } = useAuth()
   if (loading || (session && !mfaChecked)) return <div style={{ padding: 40 }}>Carregando...</div>
   if (!session) return <Navigate to="/login" replace />
   if (mfaPending) return <MFAChallenge />
+  if (!accessChecked) return <div style={{ padding: 40 }}>Carregando...</div>
+  // Teste de 45 dias vencido ou assinatura cancelada: tela de assinatura no
+  // lugar do app (o operador da plataforma nunca e bloqueado).
+  if (isBlocked(access) && !isPlatformAdmin) return <SubscriptionRequired />
   return children
 }
 

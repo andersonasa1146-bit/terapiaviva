@@ -325,8 +325,8 @@ etapa; ver "Proximos passos" no fim deste README.
 
 ## 9) Cobranca da assinatura SaaS — Mercado Pago (opcional)
 
-O app funciona normalmente sem cobranca configurada (plano `trial` com limite
-de IA padrao). Para habilitar assinaturas recorrentes (a terapeuta paga o
+Toda conta nova comeca com **45 dias de teste gratis** (ver secao 9k); ao fim
+do teste sem assinatura, a clinica fica bloqueada ate assinar. Para habilitar assinaturas recorrentes (a terapeuta paga o
 uso do TerapiaViva ao operador da plataforma):
 
 ```bash
@@ -621,6 +621,50 @@ supabase secrets set AUTENTIQUE_WEBHOOK_SECRET=<mesmo segredo do painel>
 > emitido — ver o documento `TerapiaViva_Viabilidade_Integracoes_Fase2.docx`
 > para o comparativo completo de fornecedores e custos.
 
+## 9k) Teste gratis de 45 dias, cortesia e bloqueio por assinatura
+
+Migration `20261127000000_assinatura_teste_45_dias`. Regra unica no banco
+(`account_has_access`), sempre avaliada sobre o **dono da clinica** (membros
+de equipe herdam o acesso):
+
+| Situacao | Acesso |
+|---|---|
+| Cortesia (`billing_exempt`) | Liberado, sem prazo |
+| Plano pago (`profissional`/`basico`, ligado pelo webhook do Mercado Pago) | Liberado |
+| Dentro do teste (`trial_ends_at > now()`, padrao 45 dias apos o cadastro) | Liberado |
+| Administrador da plataforma | Liberado (nunca se tranca) |
+| Teste vencido ou assinatura cancelada/pausada | **Bloqueado** |
+
+Bloqueado significa: a interface mostra a tela de assinatura (com botao
+"Assinar plano Profissional", "Ja assinei — verificar de novo" e "Baixar copia
+(LGPD)"); no banco, policies RESTRICTIVE deixam a clinica **somente leitura**
+(INSERT/UPDATE negados; SELECT, exportacao e exclusao continuam), uploads de
+arquivos/audio param, `check_ai_quota` nega IA e `list_pending_reminders`
+deixa de enviar lembretes. Nenhum dado e apagado.
+
+Trava de cobranca: o trigger `protect_therapist_billing_columns` impede o
+client (`authenticated`/`anon`) de alterar `plan`, `plan_ai_limit`,
+`ai_calls_this_month`, `ai_calls_reset_at`, `trial_ends_at`, `billing_exempt` e
+`mp_subscription_status` (exceto marcar `pending`). Webhook/Edge Functions
+(service role), funcoes SECURITY DEFINER e o painel do Supabase continuam
+podendo.
+
+Na primeira aplicacao, **todas as contas ja existentes viram cortesia** (para
+ninguem ser bloqueado de surpresa). No **Painel admin** (`/admin`) o operador ve
+o status de cada conta e pode **Dar/Tirar cortesia** e somar **+15 dias** de
+teste. Pelo SQL editor tambem da:
+
+```sql
+-- liberar uma conta sem cobranca
+update therapists set billing_exempt = true where email = 'email@dominio.com';
+-- assinatura paga por fora (ex.: Pix manual)
+update therapists set plan = 'profissional', plan_ai_limit = 300 where email = 'email@dominio.com';
+```
+
+As Edge Functions de IA, cobranca de paciente, teleconsulta e assinatura
+digital tambem checam `has_active_access` (resposta 402), mas o bloqueio ja
+vale so com a migration aplicada, sem republicar as functions.
+
 ## 10) Deploy em producao
 
 **Cloudflare Pages (frontend)**:
@@ -670,6 +714,7 @@ Antes de operar com pacientes reais, revise e complete `/termos.html` e
 | Conflito de agenda | Exclusion constraint no Postgres (nao apenas checagem no cliente) — impossivel sobrepor horarios mesmo sob condicao de corrida |
 | Portal paciente | Rota `/a/:token` publica, mas token unico expira em 7 dias |
 | Uso de IA | Cota mensal por clinica (`check_ai_quota`), compartilhada pela equipe, base para planos pagos |
+| Assinatura/teste | Teste de 45 dias + cortesia + plano pago decididos no banco (`account_has_access`); sem acesso = somente leitura via policies RESTRICTIVE; colunas de plano travadas para o client por trigger (ver secao 9k) |
 | LGPD | Exportacao (`export_patient_data`) e exclusao (`erase_patient`) self-service, disponiveis para quem tem acesso clinico |
 | Alertas de risco | Triggers automaticos (`risk_alerts`) para escalas clinicas, IA e autorrelato, com push best-effort para a clinica (ver secao 9j) |
 | Cobranca de pacientes | Token pessoal da proprietaria isolado por coluna revogada + webhook correlaciona pagamento a clinica certa via `charge_id` na URL de notificacao (nunca por busca ampla) |

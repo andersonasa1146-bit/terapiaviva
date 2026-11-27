@@ -26,6 +26,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { initSentry, captureError } from "../_shared/sentry.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
+import { hasActiveAccess, noAccessResponse } from "../_shared/access.ts";
 import { corsHeadersFor } from "../_shared/cors.ts";
 
 initSentry("sign-report");
@@ -80,6 +81,8 @@ Deno.serve(async (req) => {
 
     const rl = await checkRateLimit(supabase, `sign-report:${ownerId}`, 10, 60);
     if (!rl) return rateLimitResponse(corsHeaders);
+    // Teste de 45 dias vencido / assinatura inativa: recurso indisponivel.
+    if (!(await hasActiveAccess(supabase))) return noAccessResponse(corsHeaders);
 
     const { data: hasAccess } = await supabase.rpc("has_clinical_access");
     if (!hasAccess) return json(corsHeaders, { error: "Seu papel na equipe nao tem acesso clinico para gerar relatorios" }, 403);

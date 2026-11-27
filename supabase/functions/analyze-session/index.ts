@@ -6,6 +6,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { initSentry, captureError } from "../_shared/sentry.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
+import { hasActiveAccess, noAccessResponse } from "../_shared/access.ts";
 import { corsHeadersFor } from "../_shared/cors.ts";
 
 initSentry("analyze-session");
@@ -68,6 +69,8 @@ Deno.serve(async (req) => {
     // complementar a cota mensal check_ai_quota abaixo).
     const rl = await checkRateLimit(supabase, `analyze-session:${userRes.user.id}`, 10, 60);
     if (!rl) return rateLimitResponse(corsHeaders);
+    // Teste de 45 dias vencido / assinatura inativa: recurso indisponivel.
+    if (!(await hasActiveAccess(supabase))) return noAccessResponse(corsHeaders);
 
     // Checa cota mensal de IA do plano ANTES de gastar com a Anthropic.
     // Se a funcao ainda nao existir (banco nao migrado), segue sem bloquear.
